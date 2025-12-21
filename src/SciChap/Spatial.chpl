@@ -1,5 +1,5 @@
 module Spatial {
-  include module KdTree;
+  include module KdTreeMod;
 
-  public import this.KdTree;
+  public use this.KdTreeMod;
 }
