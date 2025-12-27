@@ -87,4 +87,32 @@ module Array {
     return [i in rng] i:T;
   }
 
+  /*
+   Finds all elements in an array matching the specified value
+
+   :arg x: input array
+   :type x: [?D] ?T
+
+   :arg value: specified value to find
+   :type value: T
+
+   :returns: indices where array values match input
+   :rtype: [] int
+   */
+  proc findAll(const ref x: [?D] ?T, in value: T): [] int where D.rank == 1 {
+    var nvalues: int = x.count(value);
+    if nvalues < 1 then return empty(int);
+
+    var resDom: domain(1) = {0..#nvalues};
+    var res: [resDom] int;
+    var inext: int = 0;
+    for i in D {
+      if x[i] == value {
+        res[inext] = i;
+        inext += 1;
+      }
+    }
+    return res;
+  }
+
 }

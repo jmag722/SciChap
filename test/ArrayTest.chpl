@@ -99,6 +99,17 @@ module ArrayTest {
     test.assertEqual(Array.arange(7..10, complex), [7+0i, 8+0i, 9+0i, 10+0i]);
   }
 
+  proc findAll_real(test: borrowed Test) throws {
+    test.assertEqual(Array.findAll([1.0, 3.0, 5.0, 0.0, 5.0], 5.0), [2, 4]);
+  }
+  proc findAll_bool(test: borrowed Test) throws {
+    test.assertEqual(Array.findAll([true, true, false], true), [0, 1]);
+  }
+  proc findAll_noneMatch(test: borrowed Test) throws {
+    var empty: [1..0] int;
+    test.assertEqual(Array.findAll([true, true, true], false), empty);
+  }
+
   proc main() throws {
     UnitTest.main();
   }
