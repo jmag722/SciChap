@@ -54,6 +54,17 @@ module KdTreeModTest {
     test.assertEqual(axis, 1);
   }
 
+  proc query(test: borrowed Test) throws {
+    var x: [{0..4, 0..2}] real = [1.0, 2.0, 13.0;
+                                  3.0, 4.0, 14.0;
+                                  5.0, 6.0, -3.0;
+                                  7.0, -9.0, 0.0;
+                                  2.0, 12.0, -6.0;];
+    var tree : Spatial.KdTree = new owned Spatial.KdTree(x);
+    var closestIdx = tree.query([3.1, 4.1, 14.1]);
+    test.assertEqual(closestIdx, 1);
+  }
+
   proc findSplit_subdomain(test: borrowed Test) throws {
     var x: [{0..4, 0..2}] real = [1.0, 2.0, 13.0;
                                   3.0, 4.0, 14.0;

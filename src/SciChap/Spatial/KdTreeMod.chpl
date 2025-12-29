@@ -7,6 +7,8 @@ module KdTreeMod {
     var dom: domain(1) = {1..0};
     var arr: [dom] int;
 
+    proc init() {}
+
     proc init(in arr: [?D] int) {
       this.dom = D;
       this.arr = arr;
@@ -58,8 +60,7 @@ module KdTreeMod {
       leaves.add(level, new bucket(pointIndices));
       while anyBucketAboveMinSize(leaves) {
         forall levelIdx in KdTree.levelIdxs(level) {
-          var defaultBucket = new bucket(Array.empty(int));
-          var pointIdxs = leaves.get(levelIdx, defaultBucket).arr;
+          var pointIdxs = leaves.get(levelIdx, new bucket()).arr;
 
           // skip leaf nodes and nonexistent nodes
           if pointIdxs.size <= leafSize then continue;
@@ -81,6 +82,75 @@ module KdTreeMod {
           leaves.remove(levelIdx);
         }
         level += 1;
+      }
+    }
+
+    /*
+     Find the index of the data point closest to the query point.
+
+     :arg queryPoint: point being queried
+     :type queryPoint: [] real
+
+     :returns: index of the closest data point
+     :rtype: int
+
+     :throws IllegalArgumentError: queryPoint domain does not match KdTree
+      domain
+     */
+    proc query(const queryPoint: [?queryD] real): int throws
+               where queryD.rank == 1 {
+      if queryD.size != dataDom.shape[dimAxis] {
+        throw new owned IllegalArgumentError(
+          "queryPoint domain does not match KdTree data dimensionality");
+      }
+      var closestIdx: int = -1;
+      var closestDistSqr: real = 1e99;
+      queryRecurse(queryPoint, nodeIdx=0, closestIdx, closestDistSqr);
+      return closestIdx;
+    }
+
+    proc queryRecurse(const queryPoint: [] real, const nodeIdx: int,
+                      ref closestIdx: int, ref closestDistSqr: real): void {
+      const currentAxis = axes[nodeIdx];
+      const currentSplit = nodes[nodeIdx];
+      if currentAxis == emptyAxisVal {
+        const bucketPtIdxs = leaves.get(nodeIdx, new bucket()).arr;
+        const nBuckets = bucketPtIdxs.size;
+        if nBuckets == 0 then halt(); // should never get here
+
+        const dimRng: range = data.dim(dimAxis);
+        var bucketPoints: [{0..#nBuckets, dimRng}] real;
+        forall i in bucketPtIdxs.domain {
+          bucketPoints[i, dimRng] = data[bucketPtIdxs[i], dimRng];
+        }
+
+        const distSqr = [i in bucketPoints.dim(ptsAxis)]
+                         + reduce (bucketPoints[i, ..] - queryPoint)**2;
+        const (newClosestDistSqr,
+               newClosestIdx) = minloc reduce zip(distSqr, bucketPtIdxs);
+        if newClosestDistSqr < closestDistSqr {
+          closestDistSqr = newClosestDistSqr;
+          closestIdx = newClosestIdx;
+        }
+        return;
+      }
+
+      const dist2planeSqr: real = (currentSplit - queryPoint[currentAxis])**2;
+      if queryPoint[currentAxis] <= currentSplit {
+        queryRecurse(queryPoint, KdTree.childIdxLeft(nodeIdx),
+                     closestIdx, closestDistSqr);
+        if closestDistSqr >= dist2planeSqr {
+          queryRecurse(queryPoint, KdTree.childIdxRight(nodeIdx),
+                       closestIdx, closestDistSqr);
+        }
+      }
+      else {
+        queryRecurse(queryPoint, KdTree.childIdxRight(nodeIdx),
+                     closestIdx, closestDistSqr);
+        if closestDistSqr >= dist2planeSqr {
+          queryRecurse(queryPoint, KdTree.childIdxLeft(nodeIdx),
+                       closestIdx, closestDistSqr);
+        }
       }
     }
 
