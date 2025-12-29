@@ -104,54 +104,62 @@ module KdTreeMod {
           "queryPoint domain does not match KdTree data dimensionality");
       }
       var closestIdx: int = -1;
-      var closestDistSqr: real = 1e99;
-      queryRecurse(queryPoint, nodeIdx=0, closestIdx, closestDistSqr);
+      var closestDistSq: real = 1e99;
+      queryRecurse(queryPoint, nodeIdx=0, closestIdx, closestDistSq);
       return closestIdx;
     }
 
     proc queryRecurse(const queryPoint: [] real, const nodeIdx: int,
-                      ref closestIdx: int, ref closestDistSqr: real): void {
-      const currentAxis = axes[nodeIdx];
-      const currentSplit = nodes[nodeIdx];
-      if currentAxis == emptyAxisVal {
+                      ref closestIdx: int, ref closestDistSq: real): void {
+      if isEmptyNode(nodeIdx) then return;
+      if isLeafNode(nodeIdx) {
         const bucketPtIdxs = leaves.get(nodeIdx, new bucket()).arr;
-        const nBuckets = bucketPtIdxs.size;
-        if nBuckets == 0 then halt(); // should never get here
+        const nBucketPts = bucketPtIdxs.size;
+        if nBucketPts == 0 then halt(); // should never get here
 
         const dimRng: range = data.dim(dimAxis);
-        var bucketPoints: [{0..#nBuckets, dimRng}] real;
+        var bucketPoints: [{0..#nBucketPts, dimRng}] real;
         forall i in bucketPtIdxs.domain {
           bucketPoints[i, dimRng] = data[bucketPtIdxs[i], dimRng];
         }
 
-        const distSqr = [i in bucketPoints.dim(ptsAxis)]
-                         + reduce (bucketPoints[i, ..] - queryPoint)**2;
-        const (newClosestDistSqr,
-               newClosestIdx) = minloc reduce zip(distSqr, bucketPtIdxs);
-        if newClosestDistSqr < closestDistSqr {
-          closestDistSqr = newClosestDistSqr;
+        const distSq = [i in bucketPoints.dim(ptsAxis)]
+                        + reduce (bucketPoints[i, ..] - queryPoint)**2;
+        const (newClosestDistSq,
+               newClosestIdx) = minloc reduce zip(distSq, bucketPtIdxs);
+        if newClosestDistSq < closestDistSq {
+          closestDistSq = newClosestDistSq;
           closestIdx = newClosestIdx;
         }
         return;
       }
 
-      const dist2planeSqr: real = (currentSplit - queryPoint[currentAxis])**2;
+      const currentAxis = axes[nodeIdx];
+      const currentSplit = nodes[nodeIdx];
+      const dist2planeSq: real = (currentSplit - queryPoint[currentAxis])**2;
       if queryPoint[currentAxis] <= currentSplit {
         queryRecurse(queryPoint, KdTree.childIdxLeft(nodeIdx),
-                     closestIdx, closestDistSqr);
-        if closestDistSqr >= dist2planeSqr {
+                     closestIdx, closestDistSq);
+        if closestDistSq >= dist2planeSq {
           queryRecurse(queryPoint, KdTree.childIdxRight(nodeIdx),
-                       closestIdx, closestDistSqr);
+                       closestIdx, closestDistSq);
         }
       }
       else {
         queryRecurse(queryPoint, KdTree.childIdxRight(nodeIdx),
-                     closestIdx, closestDistSqr);
-        if closestDistSqr >= dist2planeSqr {
+                     closestIdx, closestDistSq);
+        if closestDistSq >= dist2planeSq {
           queryRecurse(queryPoint, KdTree.childIdxLeft(nodeIdx),
-                       closestIdx, closestDistSqr);
+                       closestIdx, closestDistSq);
         }
       }
+    }
+
+    inline proc isLeafNode(in nodeIdx: int): bool {
+      return leaves.contains(nodeIdx);
+    }
+    inline proc isEmptyNode(in nodeIdx: int): bool {
+      return axes[nodeIdx] == emptyAxisVal && !isLeafNode(nodeIdx);
     }
 
     /*
