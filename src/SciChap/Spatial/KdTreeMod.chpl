@@ -9,8 +9,8 @@ module KdTreeMod {
 
     proc init() {}
 
-    proc init(in arr: [?D] int) {
-      this.dom = D;
+    proc init(in arr: [?D] int) where D.rank == 1 {
+      this.dom = {0..#D.size};
       this.arr = arr;
     }
   }
@@ -60,20 +60,21 @@ module KdTreeMod {
       leaves.add(level, new bucket(pointIndices));
       while anyBucketAboveMinSize(leaves) {
         forall levelIdx in KdTree.levelIdxs(level) {
-          var pointIdxs = leaves.get(levelIdx, new bucket()).arr;
+          const pointIdxs = leaves.get(levelIdx, new bucket()).arr;
 
           // skip leaf nodes and nonexistent nodes
           if pointIdxs.size <= leafSize then continue;
 
-          var (splitVal, splitAxis): (real, int) = findSplit(pointIdxs);
-          var leftMask = data[pointIdxs, splitAxis] <= splitVal;
-          var rightMask = data[pointIdxs, splitAxis] > splitVal;
-          var nLeftNodes: int = leftMask.count(true);
-          var nRightNodes: int = rightMask.count(true);
+          const (splitVal, splitAxis): (real, int) = findSplit(pointIdxs);
+          const leftMask = data[pointIdxs, splitAxis] <= splitVal;
+          const rightMask = data[pointIdxs, splitAxis] > splitVal;
+          const nLeftNodes: int = leftMask.count(true);
+          const nRightNodes: int = rightMask.count(true);
           // TODO: if leftMask.count(true) < 1, slide midpoint, adjust mask
-          var leftArr: [0..#nLeftNodes] int = Array.findAll(leftMask, true);
-          var rightArr: [0..#nRightNodes] int = Array.findAll(rightMask, true);
-
+          const leftArr: [0..#nLeftNodes] int = Array.boolSlice(pointIdxs,
+                                                                leftMask);
+          const rightArr: [0..#nRightNodes] int = Array.boolSlice(pointIdxs,
+                                                                  rightMask);
           leaves.add(KdTree.childIdxLeft(levelIdx), new bucket(leftArr));
           leaves.add(KdTree.childIdxRight(levelIdx), new bucket(rightArr));
           nodes[levelIdx] = splitVal;

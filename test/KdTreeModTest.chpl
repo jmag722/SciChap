@@ -61,8 +61,11 @@ module KdTreeModTest {
                                   7.0, -9.0, 0.0;
                                   2.0, 12.0, -6.0;];
     var tree : Spatial.KdTree = new owned Spatial.KdTree(x);
-    var closestIdx = tree.query([3.1, 4.1, 14.1]);
-    test.assertEqual(closestIdx, 1);
+    forall queryIdx in x.dim(0) {
+      var queryPoint = x[queryIdx, ..] + 0.1 * x[queryIdx, ..];
+      var closestIdx = tree.query(queryPoint);
+      test.assertEqual(closestIdx, queryIdx);
+    }
   }
 
   proc findSplit_subdomain(test: borrowed Test) throws {

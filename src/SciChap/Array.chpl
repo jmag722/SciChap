@@ -115,4 +115,24 @@ module Array {
     return res;
   }
 
+  /*
+   Slice array with another array of booleans. Indexing an array with another
+   array of booleans does not yield what you'd expect (it coerces boolean values
+   to integers, then uses those as indices of the array).
+
+   :arg x: input array
+   :type x: [?D] ?T
+
+   :arg mask: specified value to find
+   :type mask: [D] bool
+
+   :returns: array values where the mask was true
+   :rtype: [] T
+   */
+  proc boolSlice(const ref x: [?D] ?T, const ref mask: [D] bool): [] T
+                 where D.rank == 1 {
+    // not using square-bracket loop to maintain order
+    return for i in D do if mask[i] then x[i];
+  }
+
 }

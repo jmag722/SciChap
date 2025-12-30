@@ -110,6 +110,18 @@ module ArrayTest {
     test.assertEqual(Array.findAll([true, true, true], false), empty);
   }
 
+  proc boolSlice_1d(test: borrowed Test) throws {
+    test.assertEqual(Array.boolSlice([1, 2, 3], [true, false, false]), [1]);
+    test.assertEqual(Array.boolSlice([1, 2, 3], [true, true, false]), [1, 2]);
+    test.assertEqual(Array.boolSlice([1.3, 2.6, 3.5], [false, true, true]),
+                     [2.6, 3.5]);
+    test.assertEqual(Array.boolSlice(["foo", "bar"], [true, false]), ["foo"]);
+  }
+  proc boolSlice_noneMatch(test: borrowed Test) throws {
+    var empty: [1..0] int;
+    test.assertEqual(Array.boolSlice([1, 2], [false, false]), empty);
+  }
+
   proc main() throws {
     UnitTest.main();
   }
