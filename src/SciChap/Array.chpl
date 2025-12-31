@@ -88,7 +88,7 @@ module Array {
   }
 
   /*
-   Finds all elements in an array matching the specified value
+   Finds all element indices in an array matching the specified value
 
    :arg x: input array
    :type x: [?D] ?T
@@ -100,19 +100,7 @@ module Array {
    :rtype: [] int
    */
   proc findAll(const ref x: [?D] ?T, in value: T): [] int where D.rank == 1 {
-    var nvalues: int = x.count(value);
-    if nvalues < 1 then return empty(int);
-
-    var resDom: domain(1) = {0..#nvalues};
-    var res: [resDom] int;
-    var inext: int = 0;
-    for i in D {
-      if x[i] == value {
-        res[inext] = i;
-        inext += 1;
-      }
-    }
-    return res;
+    return [i in D] if x[i] == value then i;
   }
 
   /*
@@ -131,8 +119,7 @@ module Array {
    */
   proc boolSlice(const ref x: [?D] ?T, const ref mask: [D] bool): [] T
                  where D.rank == 1 {
-    // not using square-bracket loop to maintain order
-    return for i in D do if mask[i] then x[i];
+    return [i in D] if mask[i] then x[i];
   }
 
 }
