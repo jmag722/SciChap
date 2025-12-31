@@ -66,15 +66,19 @@ module KdTreeMod {
           if pointIdxs.size <= leafSize then continue;
 
           const (splitVal, splitAxis): (real, int) = findSplit(pointIdxs);
+
+          // TODO: when chapel supports passing promoted expressions into
+          // procs with array arguments, merge leftMask and leftArr logic
           const leftMask = data[pointIdxs, splitAxis] <= splitVal;
           const rightMask = data[pointIdxs, splitAxis] > splitVal;
           const nLeftNodes: int = leftMask.count(true);
           const nRightNodes: int = rightMask.count(true);
+
           // TODO: if leftMask.count(true) < 1, slide midpoint, adjust mask
-          const leftArr: [0..#nLeftNodes] int = Array.boolSlice(pointIdxs,
-                                                                leftMask);
-          const rightArr: [0..#nRightNodes] int = Array.boolSlice(pointIdxs,
-                                                                  rightMask);
+          const leftArr: [0..#nLeftNodes] int = pointIdxs[
+                                                Array.trueIdxs(leftMask)];
+          const rightArr: [0..#nRightNodes] int = pointIdxs[
+                                                  Array.trueIdxs(rightMask)];
           leaves.add(KdTree.childIdxLeft(levelIdx), new bucket(leftArr));
           leaves.add(KdTree.childIdxRight(levelIdx), new bucket(rightArr));
           nodes[levelIdx] = splitVal;

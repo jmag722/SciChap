@@ -99,27 +99,18 @@ module ArrayTest {
     test.assertEqual(Array.arange(7..10, complex), [7+0i, 8+0i, 9+0i, 10+0i]);
   }
 
-  proc findAll_real(test: borrowed Test) throws {
-    test.assertEqual(Array.findAll([1.0, 3.0, 5.0, 0.0, 5.0], 5.0), [2, 4]);
-  }
-  proc findAll_bool(test: borrowed Test) throws {
-    test.assertEqual(Array.findAll([true, true, false], true), [0, 1]);
-  }
-  proc findAll_noneMatch(test: borrowed Test) throws {
+  proc trueIdxs_1d(test: borrowed Test) throws {
+    test.assertEqual(Array.trueIdxs([true, false, false]), [0]);
+    test.assertEqual(Array.trueIdxs([true, true, false]), [0, 1]);
+    test.assertEqual(Array.trueIdxs([false, true, true]), [1, 2]);
     var empty: [1..0] int;
-    test.assertEqual(Array.findAll([true, true, true], false), empty);
+    test.assertEqual(Array.trueIdxs([false, false]), empty);
   }
-
-  proc boolSlice_1d(test: borrowed Test) throws {
-    test.assertEqual(Array.boolSlice([1, 2, 3], [true, false, false]), [1]);
-    test.assertEqual(Array.boolSlice([1, 2, 3], [true, true, false]), [1, 2]);
-    test.assertEqual(Array.boolSlice([1.3, 2.6, 3.5], [false, true, true]),
-                     [2.6, 3.5]);
-    test.assertEqual(Array.boolSlice(["foo", "bar"], [true, false]), ["foo"]);
-  }
-  proc boolSlice_noneMatch(test: borrowed Test) throws {
-    var empty: [1..0] int;
-    test.assertEqual(Array.boolSlice([1, 2], [false, false]), empty);
+  proc trueIdxs_2d(test: borrowed Test) throws {
+    test.assertEqual(Array.trueIdxs([true, false; false, true]),
+                                    [(0,0), (1,1)]);
+    var empty: [1..0] 2*int;
+    test.assertEqual(Array.trueIdxs([false, false; false, false]), empty);
   }
 
   proc main() throws {

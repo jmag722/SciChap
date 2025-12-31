@@ -88,38 +88,20 @@ module Array {
   }
 
   /*
-   Finds all element indices in an array matching the specified value
+   Convert boolean array into array of true-valued indices. This is helpful
+   because indexing an array with another array of booleans does not yield
+   what one might expect expect (it coerces boolean values to integers, then
+   uses those as indices of the array).
 
-   :arg x: input array
-   :type x: [?D] ?T
-
-   :arg value: specified value to find
-   :type value: T
-
-   :returns: indices where array values match input
-   :rtype: [] int
-   */
-  proc findAll(const ref x: [?D] ?T, in value: T): [] int where D.rank == 1 {
-    return [i in D] if x[i] == value then i;
-  }
-
-  /*
-   Slice array with another array of booleans. Indexing an array with another
-   array of booleans does not yield what you'd expect (it coerces boolean values
-   to integers, then uses those as indices of the array).
-
-   :arg x: input array
-   :type x: [?D] ?T
-
-   :arg mask: specified value to find
+   :arg mask: boolean array
    :type mask: [D] bool
 
-   :returns: array values where the mask was true
-   :rtype: [] T
+   :returns: array of all the true indices in mask
+   :rtype: `[] D.idxType` for 1D masks or `[] D.rank*D.idxType`
+   for multidimensional masks
    */
-  proc boolSlice(const ref x: [?D] ?T, const ref mask: [D] bool): [] T
-                 where D.rank == 1 {
-    return [i in D] if mask[i] then x[i];
+  proc trueIdxs(const ref mask: [?D] bool): [] {
+    return [i in D] if mask[i] then i;
   }
 
 }
