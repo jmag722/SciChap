@@ -36,9 +36,9 @@ module KdTreeModTest {
                     [2.0, en, en, en, en, en, en, en]));
     var ea: int = tree.emptyAxisVal;
     test.assertEqual(tree.axes, [0, ea, ea, ea, ea, ea, ea, ea]);
-    var expectedLeaves = new map(int, Spatial.bucket);
-    expectedLeaves.add(1, new Spatial.bucket([0]));
-    expectedLeaves.add(2, new Spatial.bucket([1]));
+    var expectedLeaves = new map(int, Spatial.leafBucket);
+    expectedLeaves.add(1, new Spatial.leafBucket([0]));
+    expectedLeaves.add(2, new Spatial.leafBucket([1]));
     test.assertEqual(tree.leaves, expectedLeaves);
   }
 
@@ -63,9 +63,22 @@ module KdTreeModTest {
     var tree : Spatial.KdTree = new owned Spatial.KdTree(x);
     forall queryIdx in x.dim(0) {
       var queryPoint = x[queryIdx, ..] + 0.1 * x[queryIdx, ..];
-      var closestIdx = tree.query(queryPoint);
-      test.assertEqual(closestIdx, queryIdx);
+      var (indices, distances) = tree.query(queryPoint);
+      var expectedDist = (+ reduce (x[queryIdx, ..] - queryPoint)**2)**0.5;
+      test.assertEqual(indices[0], queryIdx);
+      test.assertEqual(distances[0], expectedDist);
     }
+  }
+
+  proc query_nnearestTooBig(test: borrowed Test) throws {
+    var x: [{0..0, 0..2}] real = [1.0, 2.0, 13.0;];
+    var tree : Spatial.KdTree = new owned Spatial.KdTree(x);
+    var queryPoint = x[0, ..] + 0.1 * x[0, ..];
+    var (indices, distances) = tree.query(queryPoint, 11);
+    test.assertEqual(indices.size, 1);
+    test.assertEqual(indices[0], 0);
+    var expectedDist = (+ reduce (x[0, ..] - queryPoint)**2)**0.5;
+    test.assertEqual(distances[0], expectedDist);
   }
 
   proc findSplit_subdomain(test: borrowed Test) throws {

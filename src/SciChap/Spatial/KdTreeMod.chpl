@@ -1,9 +1,12 @@
 module KdTreeMod {
+  use Heap;
   use Map;
   use Math;
+  use Sort;
+
   import SciChap.Array;
 
-  record bucket {
+  record leafBucket {
     var dom: domain(1) = {1..0};
     var arr: [dom] int;
 
@@ -15,19 +18,57 @@ module KdTreeMod {
     }
   }
 
+  record kdTreeHeap {
+
+    // index of the point index in each tuple on the heap
+    param heapIdxIdx: int = 0;
+    // index of the distance in each tuple on the heap
+    param heapDistIdx: int = 1;
+    type heapType = (int, real);
+    record tupleComparator: keyComparator {
+      proc key(elt) do return elt[kdTreeHeap.heapDistIdx];
+    }
+
+    const maxSize: int;
+    var distQueue: heap(heapType, parSafe=true, tupleComparator);
+
+    proc init(in maxSize) {
+      this.maxSize = maxSize;
+      this.distQueue = new heap(heapType, parSafe=true, new tupleComparator());
+      init this;
+    }
+    proc size: int do return distQueue.size;
+    proc isEmpty(): bool do return distQueue.isEmpty();
+    proc isFull(): bool do return this.size >= maxSize;
+    proc last: real do return distQueue.top()[heapDistIdx];
+    proc ref push(in newItem: heapType): void {
+      distQueue.push(newItem);
+      if this.size > maxSize then distQueue.pop();
+    }
+    proc toArray(): ([0..#size] int, [0..#size] real) {
+      var heapArr: [0..#size] heapType = distQueue.toArray(); // unsorted
+      sort(heapArr, comparator=new tupleComparator());
+      var indices: [0..#size] int = [tup in heapArr] tup[heapIdxIdx];
+      var distances: [0..#size] real = [tup in heapArr] tup[heapDistIdx];
+      return (indices, distances);
+    }
+  }
+
   class KdTree {
     param ptsAxis: int = 0;
     param dimAxis: int = 1;
     param emptyNodeVal: real = nan;
     param emptyAxisVal: int = -1;
+    type leafBucketMap = map(int, leafBucket);
     const dataDom: domain(2) = {1..0, 1..0};
     const data: [dataDom] real;
     const leafSize: int;
 
+
     var nodesDom: domain(1) = {1..0};
     var nodes: [nodesDom] real;
     var axes: [nodesDom] int;
-    var leaves: map(int, bucket);
+    var leaves: leafBucketMap;
 
     proc init(const in data: [?D] real, in leafSize: int=1): void
               where D.rank == 2 {
@@ -40,7 +81,7 @@ module KdTreeMod {
       nodesDom = {0..#4*npoints};
       nodes = emptyNodeVal;
       axes = emptyAxisVal;
-      leaves = new map(int, bucket);
+      leaves = new leafBucketMap();
       init this;
 
       var pointIndicesRange: range = dataDom.dim(ptsAxis);
@@ -57,10 +98,10 @@ module KdTreeMod {
 
     proc constructTree(ref pointIndices: [] int): void {
       var level: int = 0;
-      leaves.add(level, new bucket(pointIndices));
+      leaves.add(level, new leafBucket(pointIndices));
       while anyBucketAboveMinSize(leaves) {
         forall levelIdx in KdTree.levelIdxs(level) {
-          const pointIdxs = leaves.get(levelIdx, new bucket()).arr;
+          const pointIdxs = leaves.get(levelIdx, new leafBucket()).arr;
 
           // skip leaf nodes and nonexistent nodes
           if pointIdxs.size <= leafSize then continue;
@@ -79,8 +120,8 @@ module KdTreeMod {
                                                 Array.trueIdxs(leftMask)];
           const rightArr: [0..#nRightNodes] int = pointIdxs[
                                                   Array.trueIdxs(rightMask)];
-          leaves.add(KdTree.childIdxLeft(levelIdx), new bucket(leftArr));
-          leaves.add(KdTree.childIdxRight(levelIdx), new bucket(rightArr));
+          leaves.add(KdTree.childIdxLeft(levelIdx), new leafBucket(leftArr));
+          leaves.add(KdTree.childIdxRight(levelIdx), new leafBucket(rightArr));
           nodes[levelIdx] = splitVal;
           axes[levelIdx] = splitAxis;
 
@@ -91,71 +132,77 @@ module KdTreeMod {
     }
 
     /*
-     Find the index of the data point closest to the query point.
+     Find the indices of the points closest to the query point.
 
      :arg queryPoint: point being queried
      :type queryPoint: [] real
 
-     :returns: index of the closest data point
-     :rtype: int
+     :arg nnearest: number of nearest data points to obtain, defaults to `1`.
+     If there are fewer points in the tree than specified by `nnearest`, the
+     query only output the max size of the tree.
+     :type nnearest: int
+
+     :returns: indices and distances of the N nearest data points, sorted
+     from closest to farthest
+     :rtype: ([] int, [] real)
 
      :throws IllegalArgumentError: queryPoint domain does not match KdTree
       domain
      */
-    proc query(const queryPoint: [?queryD] real): int throws
+    proc query(const queryPoint: [?queryD] real, in nnearest:int=1):
+               ([0..#nnearest] int, [0..#nnearest] real) throws
                where queryD.rank == 1 {
       if queryD.size != dataDom.shape[dimAxis] {
         throw new owned IllegalArgumentError(
           "queryPoint domain does not match KdTree data dimensionality");
       }
-      var closestIdx: int = -1;
-      var closestDistSq: real = 1e99;
-      queryRecurse(queryPoint, nodeIdx=0, closestIdx, closestDistSq);
-      return closestIdx;
+      nnearest = min(nnearest, this.npoints);
+      var search: kdTreeHeap = new kdTreeHeap(nnearest);
+      queryRecurse(queryPoint, nodeIdx=0, search);
+      var (indices, distances) = search.toArray();
+      [idx in distances.domain] distances[idx] **= 0.5;
+      return (indices, distances);
     }
 
     proc queryRecurse(const queryPoint: [] real, const nodeIdx: int,
-                      ref closestIdx: int, ref closestDistSq: real): void {
+                      ref search: kdTreeHeap): void {
       if isEmptyNode(nodeIdx) then return;
       if isLeafNode(nodeIdx) {
-        const bucketPtIdxs = leaves.get(nodeIdx, new bucket()).arr;
-        const nBucketPts = bucketPtIdxs.size;
-        if nBucketPts == 0 then halt(); // should never get here
+        const leafIdxs = leaves.get(nodeIdx, new leafBucket()).arr;
+        const nleaves = leafIdxs.size;
+        if nleaves == 0 then halt(); // should never get here
 
         const dimRng: range = data.dim(dimAxis);
-        var bucketPoints: [{0..#nBucketPts, dimRng}] real;
-        forall i in bucketPtIdxs.domain {
-          bucketPoints[i, dimRng] = data[bucketPtIdxs[i], dimRng];
+        var leafPoints: [{0..#nleaves, dimRng}] real;
+        forall i in leafIdxs.domain {
+          leafPoints[i, dimRng] = data[leafIdxs[i], dimRng];
         }
 
-        const distSq = [i in bucketPoints.dim(ptsAxis)]
-                        + reduce (bucketPoints[i, ..] - queryPoint)**2;
-        const (newClosestDistSq,
-               newClosestIdx) = minloc reduce zip(distSq, bucketPtIdxs);
-        if newClosestDistSq < closestDistSq {
-          closestDistSq = newClosestDistSq;
-          closestIdx = newClosestIdx;
+        const distSq = [i in leafPoints.dim(ptsAxis)]
+                        + reduce (leafPoints[i, ..] - queryPoint)**2;
+        const (newClosestIdx,
+               newClosestDistSq) = minloc reduce zip(leafIdxs, distSq);
+        if !search.isFull() || newClosestDistSq < search.last {
+          search.push((newClosestIdx, newClosestDistSq));
         }
         return;
       }
 
       const currentAxis = axes[nodeIdx];
       const currentSplit = nodes[nodeIdx];
+      // recurse, and if alternate branch plane is closer than the farthest
+      // accumulated point we have, search that branch too
       const dist2planeSq: real = (currentSplit - queryPoint[currentAxis])**2;
       if queryPoint[currentAxis] <= currentSplit {
-        queryRecurse(queryPoint, KdTree.childIdxLeft(nodeIdx),
-                     closestIdx, closestDistSq);
-        if closestDistSq >= dist2planeSq {
-          queryRecurse(queryPoint, KdTree.childIdxRight(nodeIdx),
-                       closestIdx, closestDistSq);
+        queryRecurse(queryPoint, KdTree.childIdxLeft(nodeIdx), search);
+        if search.last >= dist2planeSq {
+          queryRecurse(queryPoint, KdTree.childIdxRight(nodeIdx), search);
         }
       }
       else {
-        queryRecurse(queryPoint, KdTree.childIdxRight(nodeIdx),
-                     closestIdx, closestDistSq);
-        if closestDistSq >= dist2planeSq {
-          queryRecurse(queryPoint, KdTree.childIdxLeft(nodeIdx),
-                       closestIdx, closestDistSq);
+        queryRecurse(queryPoint, KdTree.childIdxRight(nodeIdx), search);
+        if search.last >= dist2planeSq {
+          queryRecurse(queryPoint, KdTree.childIdxLeft(nodeIdx), search);
         }
       }
     }
@@ -194,9 +241,9 @@ module KdTreeMod {
       return (midpoint, maxSpreadAxis);
     }
 
-    proc anyBucketAboveMinSize(const ref bucketMap: map(int, bucket)): bool {
-      for bucket in bucketMap.values() {
-        if bucket.arr.size > leafSize then return true;
+    proc anyBucketAboveMinSize(const ref leaves: leafBucketMap): bool {
+      for leafBucket in leaves.values() {
+        if leafBucket.arr.size > leafSize then return true;
       }
       return false;
     }
