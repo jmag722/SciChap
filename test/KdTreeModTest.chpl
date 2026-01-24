@@ -1,6 +1,7 @@
 module KdTreeModTest {
   use Map;
   use Math;
+  use Sort;
   use UnitTest;
   import SciChap.Spatial;
 
@@ -54,7 +55,20 @@ module KdTreeModTest {
     test.assertEqual(axis, 1);
   }
 
-  proc query(test: borrowed Test) throws {
+  proc dist2query(const pts: [] real, const query: [] real): [] real
+       where pts.rank == 2 && query.rank == 1 {
+    var expectDists: [pts.dim(0)] real;
+    forall queryIdx in expectDists.domain {
+      expectDists[queryIdx] = dist2query(pts[queryIdx, ..], query);
+    }
+    return expectDists;
+  }
+  proc dist2query(const pts: [] real, const query: [] real): real
+       where pts.rank == 1 && query.rank == 1 {
+    return (+ reduce (pts - query)**2)**0.5;
+  }
+
+  proc query_1nearest2D(test: borrowed Test) throws {
     var x: [{0..4, 0..2}] real = [1.0, 2.0, 13.0;
                                   3.0, 4.0, 14.0;
                                   5.0, 6.0, -3.0;
@@ -64,10 +78,25 @@ module KdTreeModTest {
     forall queryIdx in x.dim(0) {
       var queryPoint = x[queryIdx, ..] + 0.1 * x[queryIdx, ..];
       var (indices, distances) = tree.query(queryPoint);
-      var expectedDist = (+ reduce (x[queryIdx, ..] - queryPoint)**2)**0.5;
+      var expectedDist = dist2query(x[queryIdx, ..], queryPoint);
       test.assertEqual(indices[0], queryIdx);
       test.assertEqual(distances[0], expectedDist);
     }
+  }
+
+  proc query_allnearest2D(test: borrowed Test) throws {
+    var x: [{0..4, 0..2}] real = [1.0, 2.0, 13.0;
+                                  3.0, 4.0, 14.0;
+                                  5.0, 6.0, -3.0;
+                                  7.0, -9.0, 0.0;
+                                  2.0, 12.0, -6.0;];
+    var tree : Spatial.KdTree = new owned Spatial.KdTree(x);
+    var queryPoint = [0.0, -1.0, 0.25];
+    var (indices, distances) = tree.query(queryPoint, nnearest=5);
+    test.assertEqual(indices, [2, 3, 0, 4, 1]);
+    var expectDists = dist2query(x, queryPoint);
+    sort(expectDists);
+    test.assertEqual(distances, expectDists);
   }
 
   proc query_nnearestTooBig(test: borrowed Test) throws {
@@ -77,7 +106,7 @@ module KdTreeModTest {
     var (indices, distances) = tree.query(queryPoint, 11);
     test.assertEqual(indices.size, 1);
     test.assertEqual(indices[0], 0);
-    var expectedDist = (+ reduce (x[0, ..] - queryPoint)**2)**0.5;
+    var expectedDist = dist2query(x[0, ..], queryPoint);
     test.assertEqual(distances[0], expectedDist);
   }
 
