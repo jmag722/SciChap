@@ -96,7 +96,7 @@ module KdTreeMod {
       return data.shape[dimAxis];
     }
 
-    proc constructTree(ref pointIndices: [] int): void {
+    proc constructTree(const ref pointIndices: [] int): void {
       var level: int = 0;
       leaves.add(level, new leafBucket(pointIndices));
       while anyBucketAboveMinSize(leaves) {
@@ -198,8 +198,7 @@ module KdTreeMod {
         if search.last >= dist2planeSq {
           queryRecurse(queryPoint, KdTree.childIdxRight(nodeIdx), search);
         }
-      }
-      else {
+      } else {
         queryRecurse(queryPoint, KdTree.childIdxRight(nodeIdx), search);
         if search.last >= dist2planeSq {
           queryRecurse(queryPoint, KdTree.childIdxLeft(nodeIdx), search);
