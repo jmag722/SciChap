@@ -106,7 +106,8 @@ module KdTreeMod {
           // skip leaf nodes and nonexistent nodes
           if pointIdxs.size <= leafSize then continue;
 
-          const (splitVal, splitAxis): (real, int) = findSplit(pointIdxs);
+          const (splitVal, splitAxis): (real, int) =
+            splitMidpointMaxSpread(pointIdxs);
 
           // TODO: when chapel supports passing promoted expressions into
           // procs with array arguments, merge leftMask and leftArr logic
@@ -224,20 +225,24 @@ module KdTreeMod {
       of the hyperplane axis where the split occurs
       :rtype: tuple(real, int)
      */
-    proc findSplit(const ref unvisited: [] int): (real, int) {
-      var dimRng: range = 0..#ndim;
-      var maxVals: [dimRng] real;
-      var minVals: [dimRng] real;
-      forall axis in dimRng {
-        // TODO: when chapel handles slicing sparse domains, `unvisited` can
-        // be a sparse domain, and reduction is data[unvisited][.., axis]
-        maxVals[axis] = max reduce data[unvisited, axis];
-        minVals[axis] = min reduce data[unvisited, axis];
-      }
+    proc splitMidpointMaxSpread(const ref unvisited: [] int): (real, int) {
+      const (minVals, maxVals) = findHyperRectangleDims(unvisited);
       var (maxSpread, maxSpreadAxis) = maxloc reduce zip(maxVals - minVals,
-                                                         dimRng);
+                                                         minVals.domain);
       var midpoint = 0.5 * (maxVals[maxSpreadAxis] + minVals[maxSpreadAxis]);
       return (midpoint, maxSpreadAxis);
+    }
+
+    proc findHyperRectangleDims(const unvisited: [] int): ([0..#ndim] real,
+                                                           [0..#ndim] real) {
+      const dimRng: range = 0..#ndim;
+      var minVals: [dimRng] real;
+      var maxVals: [dimRng] real;
+      forall axis in dimRng {
+        minVals[axis] = min reduce data[unvisited, axis];
+        maxVals[axis] = max reduce data[unvisited, axis];
+      }
+      return (minVals, maxVals);
     }
 
     proc anyBucketAboveMinSize(const ref leaves: leafBucketMap): bool {

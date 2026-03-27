@@ -43,14 +43,14 @@ module KdTreeModTest {
     test.assertEqual(tree.leaves, expectedLeaves);
   }
 
-  proc findSplit_entireDomain(test: borrowed Test) throws {
+  proc splitMidpointMaxSpread_entireDomain(test: borrowed Test) throws {
     var x: [{0..4, 0..2}] real = [1.0, 2.0, 13.0;
                                   3.0, 4.0, 14.0;
                                   5.0, 6.0, -3.0;
                                   7.0, -9.0, 0.0;
                                   2.0, 12.0, -6.0;];
     var tree : Spatial.KdTree = new owned Spatial.KdTree(x);
-    var (value, axis) = tree.findSplit([0,1,2,3,4]);
+    var (value, axis) = tree.splitMidpointMaxSpread([0,1,2,3,4]);
     test.assertEqual(value, 1.5);
     test.assertEqual(axis, 1);
   }
@@ -110,14 +110,14 @@ module KdTreeModTest {
     test.assertEqual(distances[0], expectedDist);
   }
 
-  proc findSplit_subdomain(test: borrowed Test) throws {
+  proc splitMidpointMaxSpread_subdomain(test: borrowed Test) throws {
     var x: [{0..4, 0..2}] real = [1.0, 2.0, 13.0;
                                   3.0, 4.0, 14.0;
                                   5.0, 6.0, -3.0;
                                   7.0, -9.0, 0.0;
                                   2.0, 12.0, -6.0;];
     var tree : Spatial.KdTree = new owned Spatial.KdTree(x);
-    var (value, axis) = tree.findSplit([0,2,3]);
+    var (value, axis) = tree.splitMidpointMaxSpread([0,2,3]);
     test.assertEqual(value, 5.0);
     test.assertEqual(axis, 2);
   }
