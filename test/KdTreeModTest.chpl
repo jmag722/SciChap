@@ -109,6 +109,45 @@ module KdTreeModTest {
     test.assertEqual(distances[0], expectedDist);
   }
 
+  proc query2D(test: borrowed Test) throws {
+    var x = [
+      -1.1, 0.0;
+      -1.2, 0.0;
+       0.0, 0.1;
+       0.0, 0.2;
+       0.0, 0.0;
+       1.0, 0.0;
+       0.3, 0.4;
+       5.0, 3.6;
+    ];
+    var tree: Spatial.KdTree = new owned Spatial.KdTree(x, leafSize=2);
+    var queryPoint = [0.0, 0.0];
+    var (indices, distances) = tree.query(queryPoint, nnearest=8);
+    test.assertEqual(indices, [4, 2, 3, 6, 5, 0, 1, 7]);
+    var expectDists = dist2query(x, queryPoint);
+    sort(expectDists);
+    test.assertEqual(distances, expectDists);
+  }
+
+  proc query1D(test: borrowed Test) throws {
+    var x = [
+      -1.1;
+      -1.2;
+       0.1;
+       0.0;
+       1.0;
+       0.3;
+       5.0;
+    ];
+    var tree: Spatial.KdTree = new owned Spatial.KdTree(x, leafSize=2);
+    var queryPoint = [0.0];
+    var (indices, distances) = tree.query(queryPoint, nnearest=7);
+    test.assertEqual(indices, [3, 2, 5, 4, 0, 1, 6]);
+    var expectDists = dist2query(x, queryPoint);
+    sort(expectDists);
+    test.assertEqual(distances, expectDists);
+  }
+
   proc splitMidpointMaxSpread_subdomain(test: borrowed Test) throws {
     var x: [{0..4, 0..2}] real = [1.0, 2.0, 13.0;
                                   3.0, 4.0, 14.0;

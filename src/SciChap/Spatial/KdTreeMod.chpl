@@ -91,7 +91,7 @@ module KdTreeMod {
 
       // can't access proc npoints before init this
       var npoints: int = points.shape[ptsAxis];
-      nodesDom = {0..#4*npoints};
+      nodesDom = {0..#10*npoints};
       nodes = emptyNodeVal;
       axes = emptyAxisVal;
 
@@ -224,12 +224,12 @@ module KdTreeMod {
       const dist2planeSq: real = (currentSplit - queryPoint[currentAxis])**2;
       if queryPoint[currentAxis] <= currentSplit {
         queryRecurse(queryPoint, KdTree.childIdxLeft(nodeIdx), search);
-        if search.last >= dist2planeSq {
+        if !search.isFull() || search.last >= dist2planeSq {
           queryRecurse(queryPoint, KdTree.childIdxRight(nodeIdx), search);
         }
       } else {
         queryRecurse(queryPoint, KdTree.childIdxRight(nodeIdx), search);
-        if search.last >= dist2planeSq {
+        if !search.isFull() || search.last >= dist2planeSq {
           queryRecurse(queryPoint, KdTree.childIdxLeft(nodeIdx), search);
         }
       }
