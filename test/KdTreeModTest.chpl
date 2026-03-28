@@ -89,7 +89,7 @@ module KdTreeModTest {
                                   5.0, 6.0, -3.0;
                                   7.0, -9.0, 0.0;
                                   2.0, 12.0, -6.0;];
-    var tree : Spatial.KdTree = new owned Spatial.KdTree(x);
+    var tree : Spatial.KdTree = new owned Spatial.KdTree(x, leafSize=3);
     var queryPoint = [0.0, -1.0, 0.25];
     var (indices, distances) = tree.query(queryPoint, nnearest=5);
     test.assertEqual(indices, [2, 3, 0, 4, 1]);

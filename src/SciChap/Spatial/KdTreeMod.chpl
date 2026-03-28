@@ -207,12 +207,12 @@ module KdTreeMod {
           leafPoints[i, dimRng] = points[leafIdxs[i], dimRng];
         }
 
-        const distSq = [i in leafPoints.dim(ptsAxis)]
-                        + reduce (leafPoints[i, ..] - queryPoint)**2;
-        const (newClosestIdx,
-               newClosestDistSq) = minloc reduce zip(leafIdxs, distSq);
-        if !search.isFull() || newClosestDistSq < search.last {
-          search.push((newClosestIdx, newClosestDistSq));
+        const distsSq = [i in leafPoints.dim(ptsAxis)]
+                         + reduce (leafPoints[i, ..] - queryPoint)**2;
+        for (leafIdx, distSqr) in zip(leafIdxs, distsSq) {
+          if !search.isFull() || distSqr < search.last {
+            search.push((leafIdx, distSqr));
+          }
         }
         return;
       }
