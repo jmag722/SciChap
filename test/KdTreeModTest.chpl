@@ -148,6 +148,28 @@ module KdTreeModTest {
     test.assertEqual(distances, expectDists);
   }
 
+  proc queryBallPoint(test: borrowed Test) throws {
+    var x = [
+      -1.1, 0.0;
+      -1.2, 0.0;
+       0.0, 1.3;
+       0.0, 1.35;
+       0.0, 0.1;
+       0.0, 0.2;
+       0.0, 0.0;
+       1.0, 0.0; // right on the edge, should be included
+       0.3, 0.4;
+       5.0, 3.6;
+    ];
+    var tree: Spatial.KdTree = new owned Spatial.KdTree(x, leafSize=2);
+    var queryPoint = [0.0, 0.0];
+    var (indices, distances) = tree.queryBallPoint(queryPoint, radius=1);
+    test.assertEqual(indices, [6, 4, 5, 8, 7]);
+    var expectDists = dist2query(x, queryPoint);
+    sort(expectDists);
+    test.assertEqual(distances, expectDists[0..#5]);
+  }
+
   proc splitMidpointMaxSpread_subdomain(test: borrowed Test) throws {
     var x: [{0..4, 0..2}] real = [1.0, 2.0, 13.0;
                                   3.0, 4.0, 14.0;

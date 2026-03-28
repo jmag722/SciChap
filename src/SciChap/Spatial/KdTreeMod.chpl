@@ -235,6 +235,84 @@ module KdTreeMod {
       }
     }
 
+
+    /*
+     Find the indices of the points within a spherical radius of the query
+
+     :arg queryPoint: point being queried
+
+     :arg radius: Radius of spherical ball around queryPoint to search
+
+     :returns: indices and distances of the points within the ball relative to
+               the query, sorted from closest to farthest
+
+     :rtype: ([] int, [] real)
+
+     :throws IllegalArgumentError: queryPoint domain does not match KdTree
+                                   domain
+     */
+    proc queryBallPoint(const queryPoint: [?queryD] real, in radius:real)
+                        throws where queryD.rank == 1 {
+      if queryD.size != ptsDom.shape[dimAxis] {
+        throw new owned IllegalArgumentError(
+          "queryPoint domain does not match KdTree points dimensionality");
+      }
+      // use nearestPtsQueue, but never pop any off because no limit for qty
+      var search: nearestPtsQueue = new nearestPtsQueue(this.npoints);
+      queryBallPointRecurse(queryPoint, nodeIdx=0, search=search,
+                            radiusSqr=radius**2);
+      var (indices, distances) = search.toArray();
+      [idx in distances.domain] distances[idx] **= 0.5;
+      return (indices, distances);
+    }
+
+    proc queryBallPointRecurse(const queryPoint: [] real, const nodeIdx: int,
+                               ref search: nearestPtsQueue,
+                               in radiusSqr:real): void {
+      if isEmptyNode(nodeIdx) then return;
+      if isLeafNode(nodeIdx) {
+        const leafIdxs = leaves.get(nodeIdx, new leafBucket()).pointIdxs;
+        const nleaves = leafIdxs.size;
+        if nleaves == 0 then halt(); // should never get here
+
+        const dimRng: range = points.dim(dimAxis);
+        var leafPoints: [{0..#nleaves, dimRng}] real;
+        forall i in leafIdxs.domain {
+          leafPoints[i, dimRng] = points[leafIdxs[i], dimRng];
+        }
+
+        const distsSq = [i in leafPoints.dim(ptsAxis)]
+                         + reduce (leafPoints[i, ..] - queryPoint)**2;
+        for (leafIdx, distSqr) in zip(leafIdxs, distsSq) {
+          if distSqr <= radiusSqr {
+            search.push((leafIdx, distSqr));
+          }
+        }
+        return;
+      }
+
+      const currentAxis = axes[nodeIdx];
+      const currentSplit = nodes[nodeIdx];
+      // recurse, and if alternate branch plane is closer than the ball radius,
+      // then search that branch too
+      const dist2planeSq: real = (currentSplit - queryPoint[currentAxis])**2;
+      if queryPoint[currentAxis] <= currentSplit {
+        queryBallPointRecurse(queryPoint, KdTree.childIdxLeft(nodeIdx),
+                              search, radiusSqr);
+        if !search.isFull() || radiusSqr >= dist2planeSq {
+          queryBallPointRecurse(queryPoint, KdTree.childIdxRight(nodeIdx),
+                                search, radiusSqr);
+        }
+      } else {
+        queryBallPointRecurse(queryPoint, KdTree.childIdxRight(nodeIdx),
+                              search, radiusSqr);
+        if !search.isFull() || radiusSqr >= dist2planeSq {
+          queryBallPointRecurse(queryPoint, KdTree.childIdxLeft(nodeIdx),
+                                search, radiusSqr);
+        }
+      }
+    }
+
     inline proc isLeafNode(in nodeIdx: int): bool {
       return leaves.contains(nodeIdx);
     }
