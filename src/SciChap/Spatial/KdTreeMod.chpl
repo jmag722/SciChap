@@ -8,28 +8,33 @@ module KdTreeMod {
 
   record leafBucket {
     var dom: domain(1) = {1..0};
-    var arr: [dom] int;
+    // point indices in the bucket
+    var pointIdxs: [dom] int;
 
     proc init() {}
 
-    proc init(in arr: [?D] int) where D.rank == 1 {
+    proc init(in pointIdxs: [?D] int) where D.rank == 1 {
       this.dom = {0..#D.size};
-      this.arr = arr;
+      this.pointIdxs = pointIdxs;
     }
   }
 
   record kdTreeHeap {
 
-    // index of the point index in each tuple on the heap
-    param heapIdxIdx: int = 0;
-    // index of the distance in each tuple on the heap
-    param heapDistIdx: int = 1;
+    // index of the point indices in each tuple on the heap
+    param pointIdxIdx: int = 0;
+    // index of the distances in each tuple on the heap
+    param distIdx: int = 1;
     type heapType = (int, real);
+
+    // heaps need a way to sort their tuples
     record tupleComparator: keyComparator {
-      proc key(elt) do return elt[kdTreeHeap.heapDistIdx];
+      proc key(elt) do return elt[kdTreeHeap.distIdx];
     }
 
     const maxSize: int;
+    // a 'queue' where tuples of point index and distance to the queried
+    // point are stored.
     var distQueue: heap(heapType, parSafe=true, tupleComparator);
 
     proc init(in maxSize) {
@@ -40,7 +45,7 @@ module KdTreeMod {
     proc size: int do return distQueue.size;
     proc isEmpty(): bool do return distQueue.isEmpty();
     proc isFull(): bool do return this.size >= maxSize;
-    proc last: real do return distQueue.top()[heapDistIdx];
+    proc last: real do return distQueue.top()[distIdx];
     proc ref push(in newItem: heapType): void {
       distQueue.push(newItem);
       if this.size > maxSize then distQueue.pop();
@@ -48,8 +53,8 @@ module KdTreeMod {
     proc toArray(): ([0..#size] int, [0..#size] real) {
       var heapArr: [0..#size] heapType = distQueue.toArray(); // unsorted
       sort(heapArr, comparator=new tupleComparator());
-      var indices: [0..#size] int = [tup in heapArr] tup[heapIdxIdx];
-      var distances: [0..#size] real = [tup in heapArr] tup[heapDistIdx];
+      var indices: [0..#size] int = [tup in heapArr] tup[pointIdxIdx];
+      var distances: [0..#size] real = [tup in heapArr] tup[distIdx];
       return (indices, distances);
     }
   }
@@ -101,7 +106,7 @@ module KdTreeMod {
       leaves.add(level, new leafBucket(pointIndices));
       while anyBucketAboveMinSize(leaves) {
         forall levelIdx in KdTree.levelIdxs(level) {
-          const pointIdxs = leaves.get(levelIdx, new leafBucket()).arr;
+          const pointIdxs = leaves.get(levelIdx, new leafBucket()).pointIdxs;
 
           // skip leaf nodes and nonexistent nodes
           if pointIdxs.size <= leafSize then continue;
@@ -169,7 +174,7 @@ module KdTreeMod {
                       ref search: kdTreeHeap): void {
       if isEmptyNode(nodeIdx) then return;
       if isLeafNode(nodeIdx) {
-        const leafIdxs = leaves.get(nodeIdx, new leafBucket()).arr;
+        const leafIdxs = leaves.get(nodeIdx, new leafBucket()).pointIdxs;
         const nleaves = leafIdxs.size;
         if nleaves == 0 then halt(); // should never get here
 
@@ -247,7 +252,7 @@ module KdTreeMod {
 
     proc anyBucketAboveMinSize(const ref leaves: leafBucketMap): bool {
       for leafBucket in leaves.values() {
-        if leafBucket.arr.size > leafSize then return true;
+        if leafBucket.pointIdxs.size > leafSize then return true;
       }
       return false;
     }
