@@ -15,8 +15,7 @@ module KdTreeModTest {
     for i in D {
       if isNan(expected[i]) {
         equals &&= isNan(actual[i]);
-      }
-      else {
+      } else {
         equals &&= actual[i] == expected[i];
       }
     }
@@ -26,9 +25,9 @@ module KdTreeModTest {
   proc init_simple(test: borrowed Test) throws {
     var x: [{5..6, 11..12}] real = [1.0, 2.0; 3.0, 4.0];
     var tree : Spatial.KdTree = new owned Spatial.KdTree(x);
-    test.assertEqual(tree.dataDom, {0..1, 0..1});
-    test.assertEqual(tree.dataDom, tree.data.domain);
-    test.assertEqual(tree.data, [1.0, 2.0; 3.0, 4.0]);
+    test.assertEqual(tree.ptsDom, {0..1, 0..1});
+    test.assertEqual(tree.ptsDom, tree.points.domain);
+    test.assertEqual(tree.points, [1.0, 2.0; 3.0, 4.0]);
     test.assertEqual(x, [1.0, 2.0; 3.0, 4.0]);
 
     test.assertEqual(tree.nodesDom, {0..#4*x.shape[tree.ptsAxis]});
@@ -122,11 +121,6 @@ module KdTreeModTest {
     test.assertEqual(axis, 2);
   }
 
-  proc childIdxs(test: borrowed Test) throws {
-    test.assertEqual(Spatial.KdTree.childIdxs(0), (1, 2));
-    test.assertEqual(Spatial.KdTree.childIdxs(4), (9, 10));
-  }
-
   proc childIdxLeft(test:borrowed Test) throws {
     test.assertEqual(Spatial.KdTree.childIdxLeft(0), 1);
     test.assertEqual(Spatial.KdTree.childIdxLeft(3), 7);
@@ -153,11 +147,11 @@ module KdTreeModTest {
     test.assertEqual(Spatial.KdTree.nIdxs(10), 1024);
   }
 
-  proc levelIdxs(test: borrowed Test) throws {
-    test.assertEqual(Spatial.KdTree.levelIdxs(0), 0..0);
-    test.assertEqual(Spatial.KdTree.levelIdxs(1), 1..2);
-    test.assertEqual(Spatial.KdTree.levelIdxs(2), 3..6);
-    test.assertEqual(Spatial.KdTree.levelIdxs(3), 7..14);
+  proc nodeIdxs(test: borrowed Test) throws {
+    test.assertEqual(Spatial.KdTree.nodeIdxs(0), 0..0);
+    test.assertEqual(Spatial.KdTree.nodeIdxs(1), 1..2);
+    test.assertEqual(Spatial.KdTree.nodeIdxs(2), 3..6);
+    test.assertEqual(Spatial.KdTree.nodeIdxs(3), 7..14);
   }
 
   proc main() throws {
