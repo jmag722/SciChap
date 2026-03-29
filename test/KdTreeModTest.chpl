@@ -30,12 +30,17 @@ module KdTreeModTest {
     test.assertEqual(tree.points, [1.0, 2.0; 3.0, 4.0]);
     test.assertEqual(x, [1.0, 2.0; 3.0, 4.0]);
 
-    test.assertEqual(tree.nodesDom, {0..#4*x.shape[tree.ptsAxis]});
+    var expectedDom = {0..#10*x.shape[tree.ptsAxis]};
+    test.assertEqual(tree.nodesDom, expectedDom);
     var en: real = tree.emptyNodeVal;
-    test.assertTrue(assertEqualsNanArray(tree.nodes,
-                    [2.0, en, en, en, en, en, en, en]));
+    var expectedNodeArr: [expectedDom] real = en;
+    expectedNodeArr[0] = 2.0;
+    test.assertTrue(assertEqualsNanArray(tree.nodes, expectedNodeArr));
     var ea: int = tree.emptyAxisVal;
-    test.assertEqual(tree.axes, [0, ea, ea, ea, ea, ea, ea, ea]);
+    var expectedAxisArr: [expectedDom] int = ea;
+    expectedAxisArr[0] = 0;
+    test.assertEqual(tree.axes, expectedAxisArr);
+
     var expectedLeaves = new map(int, Spatial.leafBucket);
     expectedLeaves.add(1, new Spatial.leafBucket([0]));
     expectedLeaves.add(2, new Spatial.leafBucket([1]));
