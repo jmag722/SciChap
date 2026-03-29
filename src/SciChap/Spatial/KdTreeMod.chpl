@@ -305,7 +305,7 @@ module KdTreeMod {
     @chpldoc.nodoc
     proc queryBallPointRecurse(const queryPoint: [] real, const nodeIdx: int,
                                ref search: nearestPtsQueue,
-                               in radiusSqr:real): void {
+                               const ref radiusSqr:real): void {
       if isEmptyNode(nodeIdx) then return;
       if isLeafNode(nodeIdx) {
         const leafIdxs = leaves.get(nodeIdx, new leafBucket()).pointIdxs;
