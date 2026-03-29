@@ -1,11 +1,20 @@
+/*
+  **NOTE**
+
+  This module is not intended to be imported directly. Instead, use
+
+  .. code-block:: chapel
+
+       import Spatial.KdTree
+*/
 module KdTreeMod {
-  use Heap;
-  use Map;
-  use Math;
-  use Sort;
+  import Heap.heap;
+  import Map.map;
+  import Sort.{keyComparator, sort};
 
   import SciChap.Array;
 
+  @chpldoc.nodoc
   record leafBucket {
     var dom: domain(1) = {1..0};
     // point indices in the bucket
@@ -19,6 +28,7 @@ module KdTreeMod {
     }
   }
 
+  @chpldoc.nodoc
   record nearestPtsQueue {
 
     // index of the point indices in each tuple on the heap
@@ -64,25 +74,48 @@ module KdTreeMod {
     the midpoint of max spread to determine the partitions.
   */
   class KdTree {
+    @chpldoc.nodoc
     param ptsAxis: int = 0;
+
+    @chpldoc.nodoc
     param dimAxis: int = 1;
+    @chpldoc.nodoc
     const ptsDom: domain(2) = {1..0, 1..0};
+    @chpldoc.nodoc
     const points: [ptsDom] real;
 
+    @chpldoc.nodoc
     param emptyNodeVal: real = nan;
+    @chpldoc.nodoc
     var nodesDom: domain(1) = {1..0};
     // the planar value at which the current node is split
+    @chpldoc.nodoc
     var nodes: [nodesDom] real;
 
+    @chpldoc.nodoc
     param emptyAxisVal: int = -1;
     // the axis of the planar value used in the split
+    @chpldoc.nodoc
     var axes: [nodesDom] int;
 
+    @chpldoc.nodoc
     const leafSize: int;
+    @chpldoc.nodoc
     type leafBucketMap = map(int, leafBucket);
+    @chpldoc.nodoc
     var leaves: leafBucketMap;
 
+    /*
+      Initialize the KdTree
 
+      :arg points: n-dimensional set of points The size of the first
+                    dimension is the number of points, and the size of the
+                    second dimension is the number of dimensions
+
+      :arg leafSize: minimum number of points needed before simple distance
+                     method is used, defaults to unity
+
+    */
     proc init(const in points: [?D] real, in leafSize: int=1): void
               where D.rank == 2 {
       this.ptsDom = {0..#D.shape[ptsAxis], 0..#D.shape[dimAxis]};
@@ -105,9 +138,11 @@ module KdTreeMod {
       constructTree(allPointIdxs);
     }
 
+    @chpldoc.nodoc
     inline proc npoints: int {
       return points.shape[ptsAxis];
     }
+    @chpldoc.nodoc
     inline proc ndim: int {
       return points.shape[dimAxis];
     }
@@ -119,9 +154,9 @@ module KdTreeMod {
 
       Note this function does not need to be called by the user.
 
-      :arg allPointIdxs: indices of all the points input by the user.
+      :arg allPointIdxs: indices of all the points input by the user
     */
-    @chapel.nodoc
+    @chpldoc.nodoc
     proc constructTree(const ref allPointIdxs: [] int): void {
       // the level index of the binary tree
       var level: int = 0;
@@ -193,6 +228,7 @@ module KdTreeMod {
       return (indices, distances);
     }
 
+    @chpldoc.nodoc
     proc queryRecurse(const queryPoint: [] real, const nodeIdx: int,
                       ref search: nearestPtsQueue): void {
       if isEmptyNode(nodeIdx) then return;
@@ -266,6 +302,7 @@ module KdTreeMod {
       return (indices, distances);
     }
 
+    @chpldoc.nodoc
     proc queryBallPointRecurse(const queryPoint: [] real, const nodeIdx: int,
                                ref search: nearestPtsQueue,
                                in radiusSqr:real): void {
@@ -313,9 +350,11 @@ module KdTreeMod {
       }
     }
 
+    @chpldoc.nodoc
     inline proc isLeafNode(in nodeIdx: int): bool {
       return leaves.contains(nodeIdx);
     }
+    @chpldoc.nodoc
     inline proc isEmptyNode(in nodeIdx: int): bool {
       return axes[nodeIdx] == emptyAxisVal && !isLeafNode(nodeIdx);
     }
@@ -329,6 +368,7 @@ module KdTreeMod {
       :returns: splitting value (separator) of the hyperplane, and the index
                 of the hyperplane axis where the partition occurs
      */
+    @chpldoc.nodoc
     proc splitMidpointMaxSpread(const ref unvisited: [] int): (real, int) {
       const (minVals, maxVals) = findHyperRectangleDims(unvisited);
       var (maxSpread, maxSpreadAxis) = maxloc reduce zip(maxVals - minVals,
@@ -337,6 +377,7 @@ module KdTreeMod {
       return (midpoint, maxSpreadAxis);
     }
 
+    @chpldoc.nodoc
     proc findHyperRectangleDims(const unvisited: [] int): ([0..#ndim] real,
                                                            [0..#ndim] real) {
       const dimRng: range = 0..#ndim;
@@ -349,6 +390,7 @@ module KdTreeMod {
       return (minVals, maxVals);
     }
 
+    @chpldoc.nodoc
     proc anyBucketAboveMinSize(const ref leaves: leafBucketMap): bool {
       for leafBucket in leaves.values() {
         if leafBucket.pointIdxs.size > leafSize then return true;
@@ -363,6 +405,7 @@ module KdTreeMod {
 
       :returns: left child index
     */
+    @chpldoc.nodoc
     inline proc type childIdxLeft(const in parentNodeIdx: int): int {
       return 2 * parentNodeIdx + 1;
     }
@@ -373,6 +416,7 @@ module KdTreeMod {
 
       :returns: right child index
     */
+    @chpldoc.nodoc
     inline proc type childIdxRight(const in parentNodeIdx: int): int {
       return 2 * parentNodeIdx + 2;
     }
@@ -384,6 +428,7 @@ module KdTreeMod {
 
       :returns: parent node index
      */
+    @chpldoc.nodoc
     inline proc type parentIdx(const in childNodeIdx: int): int {
       return floor(0.5 * childNodeIdx - 0.5): int;
     }
@@ -395,6 +440,7 @@ module KdTreeMod {
 
       :returns: number of nodes at the given tree level
      */
+    @chpldoc.nodoc
     inline proc type nIdxs(const in level: int): int {
       return 2**level;
     }
@@ -406,6 +452,7 @@ module KdTreeMod {
 
       :returns: all node indices at the given tree level
      */
+    @chpldoc.nodoc
     proc type nodeIdxs(const in level: int): range(int) {
       return nIdxs(level) - 1..nIdxs(level+1) - 2;
     }
