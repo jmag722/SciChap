@@ -336,14 +336,14 @@ module KdTreeMod {
       if queryPoint[currentAxis] <= currentSplit {
         queryBallPointRecurse(queryPoint, KdTree.childIdxLeft(nodeIdx),
                               search, radiusSqr);
-        if !search.isFull() || radiusSqr >= dist2planeSq {
+        if radiusSqr >= dist2planeSq {
           queryBallPointRecurse(queryPoint, KdTree.childIdxRight(nodeIdx),
                                 search, radiusSqr);
         }
       } else {
         queryBallPointRecurse(queryPoint, KdTree.childIdxRight(nodeIdx),
                               search, radiusSqr);
-        if !search.isFull() || radiusSqr >= dist2planeSq {
+        if radiusSqr >= dist2planeSq {
           queryBallPointRecurse(queryPoint, KdTree.childIdxLeft(nodeIdx),
                                 search, radiusSqr);
         }
