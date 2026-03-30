@@ -99,6 +99,20 @@ module ArrayTest {
     test.assertEqual(Array.arange(7..10, complex), [7+0i, 8+0i, 9+0i, 10+0i]);
   }
 
+  proc trueIdxs_1d(test: borrowed Test) throws {
+    test.assertEqual(Array.trueIdxs([true, false, false]), [0]);
+    test.assertEqual(Array.trueIdxs([true, true, false]), [0, 1]);
+    test.assertEqual(Array.trueIdxs([false, true, true]), [1, 2]);
+    var empty: [1..0] int;
+    test.assertEqual(Array.trueIdxs([false, false]), empty);
+  }
+  proc trueIdxs_2d(test: borrowed Test) throws {
+    test.assertEqual(Array.trueIdxs([true, false; false, true]),
+                                    [(0,0), (1,1)]);
+    var empty: [1..0] 2*int;
+    test.assertEqual(Array.trueIdxs([false, false; false, false]), empty);
+  }
+
   proc main() throws {
     UnitTest.main();
   }
