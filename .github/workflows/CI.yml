@@ -17,7 +17,7 @@ jobs:
     steps:
       - name: Checkout SciChap
         id: checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: Using Chapel ${{ matrix.chapel-version }}, building package...
         id: build
         run: mason build -- --checks --warnings --debug
