@@ -12,7 +12,7 @@ jobs:
     steps:
       - name: Checkout SciChap
         id: checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: Building docs with chpldoc...
         id: build-doc
         run: mason doc
