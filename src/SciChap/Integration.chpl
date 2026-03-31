@@ -71,8 +71,7 @@ module Integration {
                where D.rank == 1 {
     if x.size < 3 {
       return trapezoid(y=y, x=x);
-    }
-    else {
+    } else {
       if !Array.isMonotonic(x) {
         throw new owned Error("Domain not strictly increasing or decreasing.");
       }

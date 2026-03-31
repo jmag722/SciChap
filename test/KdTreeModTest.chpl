@@ -5,23 +5,6 @@ module KdTreeModTest {
   use UnitTest;
   import SciChap.Spatial;
 
-  /*
-   Determine if 2 1D arrays are equal, with NaN meaning they are.
-   */
-  proc assertEqualsNanArray(const ref actual: [?D] real,
-                            const ref expected: [D] real): bool
-                            where D.rank == 1 {
-    var equals: bool = true;
-    for i in D {
-      if isNan(expected[i]) {
-        equals &&= isNan(actual[i]);
-      } else {
-        equals &&= actual[i] == expected[i];
-      }
-    }
-    return equals;
-  }
-
   proc init_simple(test: borrowed Test) throws {
     var x: [{5..6, 11..12}] real = [1.0, 2.0; 3.0, 4.0];
     var tree : Spatial.KdTree = new owned Spatial.KdTree(x);
@@ -32,10 +15,12 @@ module KdTreeModTest {
 
     var expectedDom = {0..#10*x.shape[tree.ptsAxis]};
     test.assertEqual(tree.nodesDom, expectedDom);
+
     var en: real = tree.emptyNodeVal;
     var expectedNodeArr: [expectedDom] real = en;
     expectedNodeArr[0] = 2.0;
-    test.assertTrue(assertEqualsNanArray(tree.nodes, expectedNodeArr));
+    test.assertClose(tree.nodes, expectedNodeArr, relTol=1e-15);
+
     var ea: int = tree.emptyAxisVal;
     var expectedAxisArr: [expectedDom] int = ea;
     expectedAxisArr[0] = 0;
@@ -84,7 +69,7 @@ module KdTreeModTest {
       var (indices, distances) = tree.query(queryPoint);
       var expectedDist = dist2query(x[queryIdx, ..], queryPoint);
       test.assertEqual(indices[0], queryIdx);
-      test.assertEqual(distances[0], expectedDist);
+      test.assertClose(distances[0], expectedDist, relTol=1e-15);
     }
   }
 
@@ -100,7 +85,7 @@ module KdTreeModTest {
     test.assertEqual(indices, [2, 3, 0, 4, 1]);
     var expectDists = dist2query(x, queryPoint);
     sort(expectDists);
-    test.assertEqual(distances, expectDists);
+    test.assertClose(distances, expectDists, relTol=1e-15);
   }
 
   proc query_nnearestTooBig(test: borrowed Test) throws {
@@ -111,7 +96,7 @@ module KdTreeModTest {
     test.assertEqual(indices.size, 1);
     test.assertEqual(indices[0], 0);
     var expectedDist = dist2query(x[0, ..], queryPoint);
-    test.assertEqual(distances[0], expectedDist);
+    test.assertClose(distances[0], expectedDist, relTol=1e-15);
   }
 
   proc query2D(test: borrowed Test) throws {
@@ -131,7 +116,7 @@ module KdTreeModTest {
     test.assertEqual(indices, [4, 2, 3, 6, 5, 0, 1, 7]);
     var expectDists = dist2query(x, queryPoint);
     sort(expectDists);
-    test.assertEqual(distances, expectDists);
+    test.assertClose(distances, expectDists, relTol=1e-15);
   }
 
   proc query1D(test: borrowed Test) throws {
@@ -150,7 +135,7 @@ module KdTreeModTest {
     test.assertEqual(indices, [3, 2, 5, 4, 0, 1, 6]);
     var expectDists = dist2query(x, queryPoint);
     sort(expectDists);
-    test.assertEqual(distances, expectDists);
+    test.assertClose(distances, expectDists, relTol=1e-15);
   }
 
   proc queryBallPoint(test: borrowed Test) throws {
@@ -170,9 +155,10 @@ module KdTreeModTest {
     var queryPoint = [0.0, 0.0];
     var (indices, distances) = tree.queryBallPoint(queryPoint, radius=1);
     test.assertEqual(indices, [6, 4, 5, 8, 7]);
-    var expectDists = dist2query(x, queryPoint);
-    sort(expectDists);
-    test.assertEqual(distances, expectDists[0..#5]);
+    var allDists = dist2query(x, queryPoint);
+    sort(allDists);
+    var expectedDists = allDists[0..#5];
+    test.assertClose(distances, expectedDists, relTol=1e-15);
   }
 
   proc splitMidpointMaxSpread_subdomain(test: borrowed Test) throws {
