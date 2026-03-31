@@ -11,18 +11,18 @@ module RootTest {
 
   proc bisect_polyOdd(test: borrowed Test) throws {
     var func = proc(in x: real): real {return x**3 - x**5;};
-    test.assertEqual(Root.bisect(func, -0.5, 0.5), 0.0);
-    test.assertEqual(Root.bisect(func, 2.5, 0.8, 1e-200), 1.0);
-    test.assertEqual(Root.bisect(func, -2.5, -0.8, 1e-200), -1.0);
+    test.assertClose(Root.bisect(func, -0.5, 0.5), 0.0);
+    test.assertClose(Root.bisect(func, 2.5, 0.8), 1.0);
+    test.assertClose(Root.bisect(func, -2.5, -0.8), -1.0);
   }
   proc bisect_DoubleRoot(test: borrowed Test) throws {
     var func = proc(in x: real): real {return (x-2)**2 * (-2*x+5);};
-    test.assertEqual(Root.bisect(func, 1.8, 2.51, 1e-50), 2.5);
+    test.assertClose(Root.bisect(func, 1.8, 2.51), 2.5);
     var funcPrime = proc(in x: real): real {
       return 2*(x-2)*(-2*x+5) - 2*(x-2)**2;
     };
     // to find double root, run bisection on derivative
-    test.assertEqual(Root.bisect(funcPrime, 0.0, 2.2, 1e-50), 2.0);
+    test.assertClose(Root.bisect(funcPrime, 0.0, 2.2), 2.0);
   }
 
   proc main() throws {

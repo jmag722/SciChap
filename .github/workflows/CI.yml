@@ -9,8 +9,9 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        # whatever's not 'deprecated' on Spack
-        chapel-version: ['2.6.0', '2.5.0', '2.4.0']
+        chapel-version: [
+          '2.8.0',
+        ]
     container:
       image: chapel/chapel:${{ matrix.chapel-version }}
     steps:
@@ -25,5 +26,4 @@ jobs:
         run: mason test --show
       - name: Running chplcheck...
         id: code-check
-        # TODO: remove --disable-rule after dropping chapel 2.4.0 support
-        run: chplcheck --disable-rule CamelCaseFunctions $(find . -type f -iname "*.chpl")
+        run: chplcheck $(find . -type f -iname "*.chpl")

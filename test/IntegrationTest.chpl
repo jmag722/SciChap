@@ -19,31 +19,28 @@ module IntegrationTest {
     var dom: domain(1) = {0..<5};
     var x: [dom] real = [0, 1, 2, 3, 4];
     var y: [dom] real = [0, 3, 6, 9, 12];
-    test.assertEqual(Integration.trapezoid(y, x), 24.0);
+    test.assertClose(Integration.trapezoid(y, x), 24.0, relTol=1e-15);
   }
 
   proc trapezoid_cos(test: borrowed Test) throws {
     var dom: domain(1) = {0..<4};
     var x: [dom] real = [0.0, 0.3, 0.6, 0.95];
     var y: [dom] real = cos(x);
-    var actual = Integration.trapezoid(y, x);
-    var expected = 0.8066295622395069;
-    var atol: real = 0.0;
-    var rtol: real = 1e-15;
-    test.assertLessThan(abs(actual - expected), atol + rtol*(expected));
+    test.assertClose(Integration.trapezoid(y, x), 0.8066295622395069,
+                     relTol=1e-15);
   }
 
   proc simpson_linearOdd(test: borrowed Test) throws {
     var dom: domain(1) = {0..5};
     var x: [dom] real = [1, 2, 3, 4, 5, 6];
     var y: [dom] real = [2, 4, 6, 8, 10, 12];
-    test.assertEqual(Integration.simpson(y=y, x=x), 35.0);
+    test.assertClose(Integration.simpson(y=y, x=x), 35.0, relTol=1e-15);
   }
   proc simpson_linearEven(test: borrowed Test) throws {
     var dom: domain(1) = {0..6};
     var x: [dom] real = [1, 2, 3, 4, 5, 6, 8];
     var y: [dom] real = [2, 4, 6, 8, 10, 12, 16];
-    test.assertEqual(Integration.simpson(y=y, x=x), 63.0);
+    test.assertClose(Integration.simpson(y=y, x=x), 63.0, relTol=1e-15);
   }
   proc simpson_quadraticEven(test: borrowed Test) throws {
     var n: int = 400;
@@ -56,9 +53,7 @@ module IntegrationTest {
     }
     var actual: real = Integration.simpson(y=y, x=x);
     var expected: real = 1.0/3.0 * dom.last**3 + 3 * dom.last;
-    var atol: real = 0.0;
-    var rtol: real = 1e-15;
-    test.assertLessThan(abs(actual - expected), atol + rtol*(expected));
+    test.assertClose(actual, expected, relTol=1e-15);
   }
   proc simpson_cubicOdd(test: borrowed Test) throws {
     var n: int = 525;
@@ -74,7 +69,7 @@ module IntegrationTest {
     var expected: real = 1.0/4.0 * xN**4 + 5.0/3.0 * xN**3 + 6.0 * xN;
     var atol: real = 0.0;
     var rtol: real = 1e-15;
-    test.assertLessThan(abs(actual - expected), atol + rtol*(expected));
+    test.assertClose(actual, expected, relTol=1e-15);
   }
 
   proc main() throws {
