@@ -122,7 +122,8 @@ module KdTreeMod {
                      method is used, defaults to unity
 
     */
-    proc init(const in points: [?D] real, in leafSize: int=1): void
+    proc init(const in points: [?D] real, in leafSize: int=1,
+              in memFactor: real=10.0): void
               where D.rank == 2 {
       this.ptsDom = {0..#D.shape[ptsAxis], 0..#D.shape[dimAxis]};
       this.points = points;
@@ -130,7 +131,8 @@ module KdTreeMod {
 
       // can't access proc npoints before init this
       var npoints: int = points.shape[ptsAxis];
-      nodesDom = {0..#10*npoints};
+
+      nodesDom = {0..#allocatedTreeSize(npoints, memFactor)};
       nodes = emptyNodeVal;
       axes = emptyAxisVal;
 
@@ -463,6 +465,11 @@ module KdTreeMod {
       return nIdxs(level) - 1..nIdxs(level+1) - 2;
     }
 
+  }
+
+  @chpldoc.nodoc
+  proc allocatedTreeSize(in npoints: int, in memScale:real): int {
+    return Math.ceil(memScale*npoints):int;
   }
 
 }

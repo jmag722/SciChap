@@ -13,7 +13,8 @@ module KdTreeModTest {
     test.assertEqual(tree.points, [1.0, 2.0; 3.0, 4.0]);
     test.assertEqual(x, [1.0, 2.0; 3.0, 4.0]);
 
-    var expectedDom = {0..#10*x.shape[tree.ptsAxis]};
+    var expectedDom = {0..#Spatial.allocatedTreeSize(x.shape[tree.ptsAxis],
+                                                     memScale=10)};
     test.assertEqual(tree.nodesDom, expectedDom);
 
     var en: real = tree.emptyNodeVal;
