@@ -1,11 +1,17 @@
 /*
-  **NOTE**
 
-  This module is not intended to be imported directly. Instead, use
+Private kd-tree module
 
-  .. code-block:: chapel
+**NOTE**
 
-       import Spatial.KdTree
+This module is not intended to be imported directly. Instead, use
+
+.. code-block:: chapel
+
+      import Spatial.KdTree
+
+..
+  START_HERE
 */
 module KdTreeMod {
   import Heap.heap;
