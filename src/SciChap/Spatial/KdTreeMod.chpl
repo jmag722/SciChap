@@ -162,6 +162,11 @@ module KdTreeMod {
       return points.shape[dimAxis];
     }
 
+    @chpldoc.nodoc
+    inline proc dimRng: range {
+      return points.dim(dimAxis);
+    }
+
 
     /*
       Construct the KdTree using a breadth-first approach, allowing for
@@ -244,7 +249,7 @@ module KdTreeMod {
     proc query(const queryPoint: [?queryD] real, in nnearest:int=1):
                ([0..#nnearest] int, [0..#nnearest] real) throws
                where queryD.rank == 1 {
-      if queryD.size != ptsDom.shape[dimAxis] {
+      if queryD.size != ndim {
         throw new owned IllegalArgumentError(
           "queryPoint domain does not match KdTree points dimensionality");
       }
@@ -265,7 +270,6 @@ module KdTreeMod {
         const nleaves = leafIdxs.size;
         if nleaves == 0 then halt(); // should never get here
 
-        const dimRng: range = points.dim(dimAxis);
         var leafPoints: [{0..#nleaves, dimRng}] real;
         forall i in leafIdxs.domain {
           leafPoints[i, dimRng] = points[leafIdxs[i], dimRng];
@@ -317,7 +321,7 @@ module KdTreeMod {
      */
     proc queryBallPoint(const queryPoint: [?queryD] real, in radius:real)
                         throws where queryD.rank == 1 {
-      if queryD.size != ptsDom.shape[dimAxis] {
+      if queryD.size != ndim {
         throw new owned IllegalArgumentError(
           "queryPoint domain does not match KdTree points dimensionality");
       }
@@ -340,7 +344,6 @@ module KdTreeMod {
         const nleaves = leafIdxs.size;
         if nleaves == 0 then halt(); // should never get here
 
-        const dimRng: range = points.dim(dimAxis);
         var leafPoints: [{0..#nleaves, dimRng}] real;
         forall i in leafIdxs.domain {
           leafPoints[i, dimRng] = points[leafIdxs[i], dimRng];
@@ -443,7 +446,6 @@ module KdTreeMod {
     @chpldoc.nodoc
     proc findHyperRectangleDims(const unvisited: [] int): ([0..#ndim] real,
                                                            [0..#ndim] real) {
-      const dimRng: range = 0..#ndim;
       var minVals: [dimRng] real;
       var maxVals: [dimRng] real;
       forall axis in dimRng {
