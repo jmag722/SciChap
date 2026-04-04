@@ -13,8 +13,7 @@ module KdTreeModTest {
     test.assertEqual(tree.points, [1.0, 2.0; 3.0, 4.0]);
     test.assertEqual(x, [1.0, 2.0; 3.0, 4.0]);
 
-    var expectedDom = {0..#Spatial.allocatedTreeSize(x.shape[tree.ptsAxis],
-                                                     memScale=10)};
+    var expectedDom = {0..#Spatial.allocatedTreeSize(x.shape[tree.ptsAxis], 1)};
     test.assertEqual(tree.nodesDom, expectedDom);
 
     var en: real = tree.emptyNodeVal;
@@ -64,7 +63,7 @@ module KdTreeModTest {
                                   5.0, 6.0, -3.0;
                                   7.0, -9.0, 0.0;
                                   2.0, 12.0, -6.0;];
-    var tree : Spatial.KdTree = new owned Spatial.KdTree(x);
+    var tree : Spatial.KdTree = new owned Spatial.KdTree(x, memFactor=1.7);
     forall queryIdx in x.dim(0) {
       var queryPoint = x[queryIdx, ..] + 0.1 * x[queryIdx, ..];
       var (indices, distances) = tree.query(queryPoint);
@@ -111,7 +110,8 @@ module KdTreeModTest {
        0.3, 0.4;
        5.0, 3.6;
     ];
-    var tree: Spatial.KdTree = new owned Spatial.KdTree(x, leafSize=2);
+    var tree: Spatial.KdTree = new owned Spatial.KdTree(x, leafSize=2,
+                                                        memFactor=1.1);
     var queryPoint = [0.0, 0.0];
     var (indices, distances) = tree.query(queryPoint, nnearest=8);
     test.assertEqual(indices, [4, 2, 3, 6, 5, 0, 1, 7]);

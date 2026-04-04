@@ -16,9 +16,11 @@ This module is not intended to be imported directly. Instead, use
 module KdTreeMod {
   import Heap.heap;
   import Map.map;
+  import Math;
   import Sort.{keyComparator, sort};
 
   import SciChap.Array;
+  import SciChap.Statistics;
 
   @chpldoc.nodoc
   record leafBucket {
@@ -123,7 +125,7 @@ module KdTreeMod {
 
     */
     proc init(const in points: [?D] real, in leafSize: int=1,
-              in memFactor: real=10.0): void
+              in memFactor: real=1.0): void
               where D.rank == 2 {
       this.ptsDom = {0..#D.shape[ptsAxis], 0..#D.shape[dimAxis]};
       this.points = points;
@@ -178,20 +180,33 @@ module KdTreeMod {
           // skip leaf nodes and nonexistent nodes
           if pointIdxs.size <= leafSize then continue;
 
-          const (splitVal, splitAxis): (real, int) =
-            splitMidpointMaxSpread(pointIdxs);
+          var (splitVal, splitAxis): (real, int) = splitMedian(pointIdxs);
 
           // TODO: when chapel supports passing promoted expressions into
           // procs with array arguments, merge leftMask and leftPtIdxs logic
-          const leftMask = points[pointIdxs, splitAxis] <= splitVal;
-          const rightMask = points[pointIdxs, splitAxis] > splitVal;
-          const nLeftPts: int = leftMask.count(true);
-          const nRightPts: int = rightMask.count(true);
+          var leftMask = points[pointIdxs, splitAxis] <= splitVal;
+          var rightMask = points[pointIdxs, splitAxis] > splitVal;
+
+          // slide partition so each branch has at least 1 point
+          if leftMask.count(true) == 0 {
+            var (splitVal, minIdx) = minloc reduce zip(
+              points[pointIdxs, splitAxis], pointIdxs
+            );
+            // set masks explicitly like this to avoid float comparison error
+            leftMask[minIdx] = true;
+            rightMask[minIdx] = false;
+          } else if rightMask.count(true) == 0 {
+            var (splitVal, maxIdx) = maxloc reduce zip(
+              points[pointIdxs, splitAxis], pointIdxs
+            );
+            leftMask[maxIdx] = false;
+            rightMask[maxIdx] = true;
+          }
 
           // TODO: if leftMask.count(true) < 1, slide midpoint, adjust mask
-          const leftPtIdxs: [0..#nLeftPts] int = pointIdxs[
+          const leftPtIdxs: [0..#leftMask.count(true)] int = pointIdxs[
                                                 Array.trueIdxs(leftMask)];
-          const rightPtIdxs: [0..#nRightPts] int = pointIdxs[
+          const rightPtIdxs: [0..#rightMask.count(true)] int = pointIdxs[
                                                   Array.trueIdxs(rightMask)];
           leaves.add(KdTree.childIdxLeft(nodeIdx), new leafBucket(leftPtIdxs));
           leaves.add(KdTree.childIdxRight(
@@ -368,8 +383,8 @@ module KdTreeMod {
     }
 
     /*
-      Find the appropriate splitting value and axis for a subdomain of the
-      data points.
+      Split the unvisited data points at the midpoint, along the axis with
+      the greatest spread.
 
       :arg unvisited: unvisited point indices yet to be partitioned
 
@@ -379,6 +394,41 @@ module KdTreeMod {
     @chpldoc.nodoc
     proc splitMidpointMaxSpread(const ref unvisited: [] int): (real, int) {
       const (minVals, maxVals) = findHyperRectangleDims(unvisited);
+      return splitHyperRectangle(minVals, maxVals);
+    }
+
+    /*
+      Split the unvisited data points at the median, along the axis with
+      the greatest spread.
+
+      :arg unvisited: unvisited point indices yet to be partitioned
+
+      :returns: splitting value (separator) of the hyperplane, and the index
+                of the hyperplane axis where the partition occurs
+     */
+    @chpldoc.nodoc
+    proc splitMedian(const ref unvisited: [] int): (real, int) {
+      const (minVals, maxVals) = findHyperRectangleDims(unvisited);
+      var (_, maxSpreadAxis) = maxloc reduce zip(maxVals - minVals,
+                                                 minVals.domain);
+      var slice: [0..#unvisited.size] real = points[unvisited, maxSpreadAxis];
+      return (Statistics.median(slice), maxSpreadAxis);
+    }
+
+    /*
+      Split a hyperrectangle at the midpoint, along the side with greatest
+      length.
+
+      :arg minVals: min hyperrectangle values along each dimension
+
+      :arg maxVals: max hyperrectangle values along each dimension
+
+      :returns: splitting value (separator) of the hyperplane, and the index
+                of the hyperplane axis where the partition occurs
+     */
+    @chpldoc.nodoc
+    proc splitHyperRectangle(const minVals: [0..#ndim] real,
+                             const maxVals: [0..#ndim] real): (real, int) {
       var (maxSpread, maxSpreadAxis) = maxloc reduce zip(maxVals - minVals,
                                                          minVals.domain);
       var midpoint = 0.5 * (maxVals[maxSpreadAxis] + minVals[maxSpreadAxis]);
