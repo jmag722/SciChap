@@ -121,10 +121,15 @@ module KdTreeMod {
                     second dimension is the number of dimensions
 
       :arg leafSize: minimum number of points needed before simple distance
-                     method is used, defaults to unity
+                     method is used
+
+      :arg memFactor: Multiplier for the tree size (increases memory). With
+                      the midpoint and even median based splitting, when leaf
+                      sizes are small, often the tree size can be larger than
+                      the actual number of points.
 
     */
-    proc init(const in points: [?D] real, in leafSize: int=1,
+    proc init(const in points: [?D] real, in leafSize: int=10,
               in memFactor: real=1.0): void
               where D.rank == 2 {
       this.ptsDom = {0..#D.shape[ptsAxis], 0..#D.shape[dimAxis]};

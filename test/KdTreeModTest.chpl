@@ -7,7 +7,7 @@ module KdTreeModTest {
 
   proc init_simple(test: borrowed Test) throws {
     var x: [{5..6, 11..12}] real = [1.0, 2.0; 3.0, 4.0];
-    var tree : Spatial.KdTree = new owned Spatial.KdTree(x);
+    var tree = new owned Spatial.KdTree(x, leafSize=1);
     test.assertEqual(tree.ptsDom, {0..1, 0..1});
     test.assertEqual(tree.ptsDom, tree.points.domain);
     test.assertEqual(tree.points, [1.0, 2.0; 3.0, 4.0]);
@@ -38,7 +38,7 @@ module KdTreeModTest {
                                   5.0, 6.0, -3.0;
                                   7.0, -9.0, 0.0;
                                   2.0, 12.0, -6.0;];
-    var tree : Spatial.KdTree = new owned Spatial.KdTree(x);
+    var tree = new owned Spatial.KdTree(x, leafSize=1);
     var (value, axis) = tree.splitMidpointMaxSpread([0,1,2,3,4]);
     test.assertEqual(value, 1.5);
     test.assertEqual(axis, 1);
@@ -63,7 +63,7 @@ module KdTreeModTest {
                                   5.0, 6.0, -3.0;
                                   7.0, -9.0, 0.0;
                                   2.0, 12.0, -6.0;];
-    var tree : Spatial.KdTree = new owned Spatial.KdTree(x, memFactor=1.7);
+    var tree = new owned Spatial.KdTree(x, memFactor=1.7, leafSize=1);
     forall queryIdx in x.dim(0) {
       var queryPoint = x[queryIdx, ..] + 0.1 * x[queryIdx, ..];
       var (indices, distances) = tree.query(queryPoint);
@@ -79,7 +79,7 @@ module KdTreeModTest {
                                   5.0, 6.0, -3.0;
                                   7.0, -9.0, 0.0;
                                   2.0, 12.0, -6.0;];
-    var tree : Spatial.KdTree = new owned Spatial.KdTree(x, leafSize=3);
+    var tree = new owned Spatial.KdTree(x, leafSize=3);
     var queryPoint = [0.0, -1.0, 0.25];
     var (indices, distances) = tree.query(queryPoint, nnearest=5);
     test.assertEqual(indices, [2, 3, 0, 4, 1]);
@@ -90,7 +90,7 @@ module KdTreeModTest {
 
   proc query_nnearestTooBig(test: borrowed Test) throws {
     var x: [{0..0, 0..2}] real = [1.0, 2.0, 13.0;];
-    var tree : Spatial.KdTree = new owned Spatial.KdTree(x);
+    var tree = new owned Spatial.KdTree(x, leafSize=1);
     var queryPoint = x[0, ..] + 0.1 * x[0, ..];
     var (indices, distances) = tree.query(queryPoint, 11);
     test.assertEqual(indices.size, 1);
@@ -110,8 +110,7 @@ module KdTreeModTest {
        0.3, 0.4;
        5.0, 3.6;
     ];
-    var tree: Spatial.KdTree = new owned Spatial.KdTree(x, leafSize=2,
-                                                        memFactor=1.1);
+    var tree = new owned Spatial.KdTree(x, leafSize=2, memFactor=1.1);
     var queryPoint = [0.0, 0.0];
     var (indices, distances) = tree.query(queryPoint, nnearest=8);
     test.assertEqual(indices, [4, 2, 3, 6, 5, 0, 1, 7]);
@@ -130,13 +129,21 @@ module KdTreeModTest {
        0.3;
        5.0;
     ];
-    var tree: Spatial.KdTree = new owned Spatial.KdTree(x, leafSize=2);
+    var tree = new owned Spatial.KdTree(x, leafSize=2);
     var queryPoint = [0.0];
     var (indices, distances) = tree.query(queryPoint, nnearest=7);
     test.assertEqual(indices, [3, 2, 5, 4, 0, 1, 6]);
     var expectDists = dist2query(x, queryPoint);
     sort(expectDists);
     test.assertClose(distances, expectDists, relTol=1e-15);
+  }
+
+  proc query_outsidePt(test: borrowed Test) throws {
+    var x = [-3.0, -10.0; 5.0, 6.0; 0.0, 0.0;];
+    var tree = new owned Spatial.KdTree(x, leafSize=1, memFactor=1.4);
+    var queryPoint = [2000.0, 200.0];
+    var (indices, distances) = tree.query(queryPoint, nnearest=1);
+    test.assertEqual(indices, [1,]);
   }
 
   proc queryBallPoint(test: borrowed Test) throws {
@@ -152,7 +159,7 @@ module KdTreeModTest {
        0.3, 0.4;
        5.0, 3.6;
     ];
-    var tree: Spatial.KdTree = new owned Spatial.KdTree(x, leafSize=2);
+    var tree = new owned Spatial.KdTree(x, leafSize=2);
     var queryPoint = [0.0, 0.0];
     var (indices, distances) = tree.queryBallPoint(queryPoint, radius=1);
     test.assertEqual(indices, [6, 4, 5, 8, 7]);
@@ -168,7 +175,7 @@ module KdTreeModTest {
                                   5.0, 6.0, -3.0;
                                   7.0, -9.0, 0.0;
                                   2.0, 12.0, -6.0;];
-    var tree : Spatial.KdTree = new owned Spatial.KdTree(x);
+    var tree = new owned Spatial.KdTree(x, leafSize=1);
     var (value, axis) = tree.splitMidpointMaxSpread([0,2,3]);
     test.assertEqual(value, 5.0);
     test.assertEqual(axis, 2);
