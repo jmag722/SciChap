@@ -3,6 +3,8 @@ module KdTreeModTest {
   use Math;
   use Sort;
   use UnitTest;
+
+  import SciChap.Array;
   import SciChap.Spatial;
 
   proc init_simple(test: borrowed Test) throws {
@@ -159,7 +161,8 @@ module KdTreeModTest {
        0.3, 0.4;
        5.0, 3.6;
     ];
-    var tree = new owned Spatial.KdTree(x, leafSize=2);
+    var tree = new owned Spatial.KdTree(
+      x, leafSize=2, splitter=Spatial.Splitter.MidpointRectangle, memFactor=20);
     var queryPoint = [0.0, 0.0];
     var (indices, distances) = tree.queryBallPoint(queryPoint, radius=1);
     test.assertEqual(indices, [6, 4, 5, 8, 7]);
@@ -212,6 +215,17 @@ module KdTreeModTest {
     test.assertEqual(Spatial.KdTree.nodeIdxs(1), 1..2);
     test.assertEqual(Spatial.KdTree.nodeIdxs(2), 3..6);
     test.assertEqual(Spatial.KdTree.nodeIdxs(3), 7..14);
+  }
+
+  proc allParentIdxs(test: borrowed Test) throws {
+    test.assertEqual(Spatial.allParentIdxs(0, 0), [0]);
+    test.assertEqual(Spatial.allParentIdxs(1, 1), [1, 0]);
+    test.assertEqual(Spatial.allParentIdxs(2, 1), [2, 0]);
+    test.assertEqual(Spatial.allParentIdxs(3, 2), [3, 1, 0]);
+    test.assertEqual(Spatial.allParentIdxs(4, 2), [4, 1, 0]);
+    test.assertEqual(Spatial.allParentIdxs(5, 2), [5, 2, 0]);
+    test.assertEqual(Spatial.allParentIdxs(6, 2), [6, 2, 0]);
+    test.assertEqual(Spatial.allParentIdxs(8, 3), [8, 3, 1, 0]);
   }
 
   proc main() throws {
