@@ -81,13 +81,28 @@ module KdTreeModTest {
                                   5.0, 6.0, -3.0;
                                   7.0, -9.0, 0.0;
                                   2.0, 12.0, -6.0;];
-    var tree = new owned Spatial.KdTree(x, leafSize=3);
     var queryPoint = [0.0, -1.0, 0.25];
-    var (indices, distances) = tree.query(queryPoint, nnearest=5);
-    test.assertEqual(indices, [2, 3, 0, 4, 1]);
+
+    var expectedIdxs = [2, 3, 0, 4, 1];
     var expectDists = dist2query(x, queryPoint);
     sort(expectDists);
+
+    var tree = new owned Spatial.KdTree(x, leafSize=3);
+    var (indices, distances) = tree.query(queryPoint, nnearest=5);
+    test.assertEqual(indices, expectedIdxs);
     test.assertClose(distances, expectDists, relTol=1e-15);
+
+    var tree2 = new owned Spatial.KdTree(x, leafSize=3, memFactor=1.5,
+      splitter=Spatial.Splitter.MidpointRectangle);
+    var (indices2, distances2) = tree2.query(queryPoint, nnearest=5);
+    test.assertEqual(indices2, expectedIdxs);
+    test.assertClose(distances2, expectDists, relTol=1e-15);
+
+    var tree3 = new owned Spatial.KdTree(x, leafSize=3, memFactor=1.5,
+      splitter=Spatial.Splitter.MidpointMaxSpread);
+    var (indices3, distances3) = tree3.query(queryPoint, nnearest=5);
+    test.assertEqual(indices3, expectedIdxs);
+    test.assertClose(distances3, expectDists, relTol=1e-15);
   }
 
   proc query_nnearestTooBig(test: borrowed Test) throws {
@@ -131,13 +146,28 @@ module KdTreeModTest {
        0.3;
        5.0;
     ];
-    var tree = new owned Spatial.KdTree(x, leafSize=2);
     var queryPoint = [0.0];
-    var (indices, distances) = tree.query(queryPoint, nnearest=7);
-    test.assertEqual(indices, [3, 2, 5, 4, 0, 1, 6]);
+
     var expectDists = dist2query(x, queryPoint);
     sort(expectDists);
+    var expectedIdxs = [3, 2, 5, 4, 0, 1, 6];
+
+    var tree = new owned Spatial.KdTree(x, leafSize=2);
+    var (indices, distances) = tree.query(queryPoint, nnearest=7);
+    test.assertEqual(indices, expectedIdxs);
     test.assertClose(distances, expectDists, relTol=1e-15);
+
+    var tree2 = new owned Spatial.KdTree(x, leafSize=2, memFactor=3,
+      splitter=Spatial.Splitter.MidpointRectangle);
+    var (indices2, distances2) = tree2.query(queryPoint, nnearest=7);
+    test.assertEqual(indices2, expectedIdxs);
+    test.assertClose(distances2, expectDists, relTol=1e-15);
+
+    var tree3 = new owned Spatial.KdTree(x, leafSize=2, memFactor=3,
+      splitter=Spatial.Splitter.MidpointMaxSpread);
+    var (indices3, distances3) = tree3.query(queryPoint, nnearest=7);
+    test.assertEqual(indices3, expectedIdxs);
+    test.assertClose(distances3, expectDists, relTol=1e-15);
   }
 
   proc query_outsidePt(test: borrowed Test) throws {
@@ -161,15 +191,30 @@ module KdTreeModTest {
        0.3, 0.4;
        5.0, 3.6;
     ];
-    var tree = new owned Spatial.KdTree(
-      x, leafSize=2, splitter=Spatial.Splitter.MidpointRectangle, memFactor=20);
     var queryPoint = [0.0, 0.0];
-    var (indices, distances) = tree.queryBallPoint(queryPoint, radius=1);
-    test.assertEqual(indices, [6, 4, 5, 8, 7]);
+
+    var expectedIdxs = [6, 4, 5, 8, 7];
     var allDists = dist2query(x, queryPoint);
     sort(allDists);
     var expectedDists = allDists[0..#5];
+
+    var tree = new owned Spatial.KdTree(
+      x, leafSize=2, splitter=Spatial.Splitter.MidpointRectangle, memFactor=20);
+    var (indices, distances) = tree.queryBallPoint(queryPoint, radius=1);
+    test.assertEqual(indices, expectedIdxs);
     test.assertClose(distances, expectedDists, relTol=1e-15);
+
+    var tree2 = new owned Spatial.KdTree(
+      x, leafSize=2, splitter=Spatial.Splitter.MedianMaxSpread);
+    var (indices2, distances2) = tree2.queryBallPoint(queryPoint, radius=1);
+    test.assertEqual(indices2, expectedIdxs);
+    test.assertClose(distances2, expectedDists, relTol=1e-15);
+
+    var tree3 = new owned Spatial.KdTree(x, leafSize=2,
+      splitter=Spatial.Splitter.MidpointMaxSpread, memFactor=10);
+    var (indices3, distances3) = tree3.queryBallPoint(queryPoint, radius=1);
+    test.assertEqual(indices3, expectedIdxs);
+    test.assertClose(distances3, expectedDists, relTol=1e-15);
   }
 
   proc splitMidpointMaxSpread_subdomain(test: borrowed Test) throws {
