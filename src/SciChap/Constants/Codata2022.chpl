@@ -9,6 +9,7 @@ module Codata2022 {
     symbol="eV"
   );
 
+
   // Universal constants
 
   /* Speed of light in vacuum */
@@ -132,6 +133,138 @@ module Codata2022 {
     uncertainty=0.000_060e-44,
     unit="s",
     symbol="t_P"
+  );
+
+
+  // Electromagnetic constants
+
+  /* Elementary charge */
+  const elementaryCharge = new constant(
+    value=1.602_176_634e-19,
+    unit="C",
+    symbol="e"
+  );
+
+  /* Elementary charge over h-bar */
+  const elementaryChargeHbar = new constant(
+    value=elementaryCharge.value / reducedPlanck.value,
+    unit="A J^-1",
+    symbol="e/\\hbar"
+  );
+
+  /* Magnetic flux quantum */
+  const magneticFluxQuantum = new constant(
+    value=planck.value / (2 * elementaryCharge.value),
+    unit="Wb",
+    symbol="\\Phi_0"
+  );
+
+  /* Conductance quantum */
+  const conductanceQuantum = new constant(
+    value=2 * elementaryCharge.value*elementaryCharge.value / planck.value,
+    unit="S",
+    symbol="G_0"
+  );
+
+  /* Inverse of conductance quantum */
+  const conductanceQuantumInverse = new constant(
+    value=1/conductanceQuantum.value,
+    unit="ohm",
+    symbol="G_0^-1"
+  );
+
+  /* Josephson constant */
+  const josephson = new constant(
+    value=2 * elementaryCharge.value / planck.value,
+    unit="Hz V^-1",
+    symbol="K_J"
+  );
+
+  /* von Klitzing constant */
+  const vonKlitzing = new constant(
+    value=planck.value / (elementaryCharge.value*elementaryCharge.value),
+    unit="ohm",
+    symbol="R_K"
+  );
+
+  /* Bohr magneton */
+  const bohrMagneton = new constant(
+    value=9.274_010_0657e-24,
+    uncertainty=0.000_000_0029e-24,
+    unit="J T^-1",
+    symbol="\\mu_B"
+  );
+
+  /* Bohr magneton in eV/T */
+  const bohrMagnetonEv = new constant(
+    value=5.788_381_7982e-5,
+    uncertainty=0.000_000_0018e-5,
+    unit="eV T^-1",
+    symbol="\\mu_B"
+  );
+
+  /* Bohr magneton in Hz/T */
+  const bohrMagnetonHz = new constant(
+    value=1.399_624_491_71e10,
+    uncertainty=0.000_000_000_44e10,
+    unit="Hz T^-1",
+    symbol="\\mu_B/h"
+  );
+
+  /* Bohr magneton in inverse meter per tesla */
+  const bohrMagnetonInverseMeter = new constant(
+    value=46.686_447_719,
+    uncertainty=0.000_000_015,
+    unit="m^-1 T^-1",
+    symbol="\\mu_B/(hc)"
+  );
+
+  /* Bohr magneton in K/T */
+  const bohrMagnetonKelvin = new constant(
+    value=0.671_713_814_72,
+    uncertainty=0.000_000_000_21,
+    unit="K T^-1",
+    symbol="\\mu_B/k"
+  );
+
+  /* Nuclear magneton */
+  const nuclearMagneton = new constant(
+    value=5.050_783_7393e-27,
+    uncertainty=0.000_000_0016e-27,
+    unit="J T^-1",
+    symbol="\\mu_N"
+  );
+
+  /* Nuclear magneton in eV/T */
+  const nuclearMagnetonEv = new constant(
+    value=3.152_451_254_17e-8,
+    uncertainty=0.000_000_000_98e-8,
+    unit="eV T^-1",
+    symbol="\\mu_N"
+  );
+
+  /* Nuclear magneton in MHz/T */
+  const nuclearMagnetonMhz = new constant(
+    value=7.622_593_2188,
+    uncertainty=0.000_000_0024,
+    unit="MHz T^-1",
+    symbol="\\mu_N/h"
+  );
+
+  /* Nuclear magneton in inverse meter per tesla */
+  const nuclearMagnetonInverseMeter = new constant(
+    value=2.542_623_410_09e-2,
+    uncertainty=0.000_000_000_79e-2,
+    unit="m^-1 T^-1",
+    symbol="\\mu_N/(hc)"
+  );
+
+  /* Nuclear magneton in K/T */
+  const nuclearMagnetonKelvin = new constant(
+    value=3.658_267_7706e-4,
+    uncertainty=0.000_000_0011e-4,
+    unit="K T^-1",
+    symbol="\\mu_N/k"
   );
 
 }
