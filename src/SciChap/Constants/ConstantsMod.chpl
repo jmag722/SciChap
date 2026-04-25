@@ -8,8 +8,6 @@ module ConstantsMod {
     param uncertainty: real=0.0;
     /* unit */
     param unit: string="";
-    /* Latex symbol */
-    param symbol: string="";
 
     /* relative standard uncertainty */
     proc relUncertainty do return value / uncertainty;
