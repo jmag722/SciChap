@@ -81,7 +81,7 @@ module GenerateCodata {
   }
 
   proc writeData(cd: codata, yr: int): void throws {
-    const outFilename = "../src/SciChap/Constants/Codata" + yr:string + ".chpl";
+    const outFilename = "Codata" + yr:string + ".chpl";
     const outFile = IO.openWriter(outFilename);
 
     outFile.write("module Codata", yr:string, " {\n");
