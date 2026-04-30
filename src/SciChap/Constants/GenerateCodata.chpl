@@ -88,7 +88,13 @@ module GenerateCodata {
     outFile.write(sep, "import ConstantsMod.constant;\n\n");
 
     for idx in 0..#cd.n {
-      outFile.write(sep, "/* ", cd.names[idx], " */\n");
+      // write comment describing variable, if exact or not
+      outFile.write(sep, "/* ", cd.names[idx]);
+      if cd.exact[idx] {
+        outFile.write(" (exact)");
+      }
+      outFile.write(" */\n");
+
       outFile.write(sep, "const ", cd.varnames[idx], " = new constant(\n");
       outFile.write(sep, sep, "name=", "\"", cd.names[idx], "\"", ",\n");
       outFile.write(sep, sep, "value=", cd.values[idx]);
