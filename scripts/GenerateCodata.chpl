@@ -1,78 +1,143 @@
 module GenerateCodata {
   import IO;
+  import Map;
   import Regex;
 
-  proc main() {
-    var file = "codata2022.txt";
-    var filereader = try! IO.openReader(file);
+  var codataMap = new Map.map(int, string);
+  codataMap.add(2022, "https://pml.nist.gov/cuu/Constants/Table/allascii.txt");
+  config const year:int = 2022;
+  const sep = "  ";
 
+  proc getCodataInfo(reader): (int, int, int) throws {
+    var nlines = 0;
     var header = true;
-    const sep = "  ";
+    var nheader = 0;
+    var yearRegex = new Regex.regex("\\d{4}");
+    var year: int = -1;
 
-    const outFile = try! IO.openWriter(
-      "../src/SciChap/Constants/Codata2022.chpl"
-    );
-    try! outFile.write("module Codata2022 {\n");
-    try! outFile.write(sep, "import ConstantsMod.constant;\n\n");
+    for line in reader.lines() {
+      nlines += 1;
 
-    for line in filereader.lines() {
       if header {
-        if line.startsWith("----------") {
-          header = false;
+        nheader += 1;
+        var potentialMatch = yearRegex.search(line);
+        if potentialMatch.matched {
+          year = line[potentialMatch]:int;
         }
-        continue;
+        if line.startsWith("----------") then header = false;
       }
+    }
+    var nconstants = nlines - nheader;
+    return (nconstants, nheader, year);
+  }
 
-      // split columns
-      const name = line[0..<60].strip();
-      var value = line[60..<85].strip();
-      var uncertainty = line[85..<110].strip();
-      const unit = line[110..].strip();
+  record codata {
+    var n: int;
+    var names: [0..#n] string;
+    var varnames: [0..#n] string;
+    var values: [0..#n] string;
+    var uncertainties: [0..#n] string;
+    var units: [0..#n] string;
+    var derived: [0..#n] bool;
+    var unitless: [0..#n] bool;
+    var exact: [0..#n] bool;
+  }
 
-      // create variable name - remove symbols, make camel case
-      var varname = name;
-      varname = try! varname.replace(new Regex.regex("[ .()/,-]"), "_");
-      var varlist = varname.split("_");
-      varname = varlist[0].toLower();
+  proc readData(filereader, nconstants: int, nheader: int): codata throws {
+    var cd = new codata(n=nconstants);
+
+    for 1..#nheader do filereader.readLine();
+
+    for idx in 0..#nconstants {
+      var line = filereader.readLine();
+      cd.names[idx] = line[0..<60].strip();
+      cd.units[idx] = line[110..].strip();
+      cd.unitless[idx] = cd.units[idx] == "";
+
+      // create variable name, remove symbols
+      cd.varnames[idx] = cd.names[idx];
+      cd.varnames[idx] = cd.varnames[idx].replace(
+        new Regex.regex("[ .()/,-]"), "_");
+      // make varname camel case
+      var varlist = cd.varnames[idx].split("_");
+      cd.varnames[idx] = varlist[0].toLower();
       for v in varlist[1..] {
-        varname += v.toTitle();
+        cd.varnames[idx] += v.toTitle();
       }
 
-      value = value.replace(" ", "_");
-      value = value.replace("_e", "e");
-      var isDerivedConst = false;
-      if value.contains("...") then isDerivedConst = true;
-      value = value.replace("...", "");
+      var val_tmp = line[60..<85].strip();
+      val_tmp = val_tmp.replace(" ", "_");
+      val_tmp = val_tmp.replace("_e", "e");
+      cd.derived[idx] = val_tmp.contains("...");
+      cd.values[idx] = val_tmp.replace("...", "");
 
-      uncertainty = uncertainty.replace(" ", "_");
-      uncertainty = uncertainty.replace("_e", "e");
-      const isExact = uncertainty == "(exact)";
+      var u_tmp = line[85..<110].strip();
+      u_tmp = u_tmp.replace(" ", "_");
+      u_tmp = u_tmp.replace("_e", "e");
+      cd.exact[idx] = u_tmp.contains("(exact)");
+      cd.uncertainties[idx] = u_tmp.replace("(exact)", "0.0");
+    }
+    return cd;
+  }
 
-      const unitless = unit == "";
+  proc writeData(cd: codata, yr: int): void throws {
+    const outFilename = "../src/SciChap/Constants/Codata" + yr:string + ".chpl";
+    const outFile = IO.openWriter(outFilename);
 
-      try! outFile.write(sep, "/* ", name, " */\n");
-      try! outFile.write(sep, "const ", varname, " = new constant(\n");
-      try! outFile.write(sep, sep, "name=", "\"", name, "\"", ",\n");
+    outFile.write("module Codata", yr:string, " {\n");
+    outFile.write(sep, "import ConstantsMod.constant;\n\n");
 
-      try! outFile.write(sep, sep, "value=", value);
-      if !isExact || !unitless {
-        try! outFile.write(",\n");
+    for idx in 0..#cd.n {
+      outFile.write(sep, "/* ", cd.names[idx], " */\n");
+      outFile.write(sep, "const ", cd.varnames[idx], " = new constant(\n");
+      outFile.write(sep, sep, "name=", "\"", cd.names[idx], "\"", ",\n");
+      outFile.write(sep, sep, "value=", cd.values[idx]);
+      // if something after `value`
+      if !cd.exact[idx] || !cd.unitless[idx] {
+        outFile.write(",\n");
       }
 
-      if !isExact {
-        try! outFile.write(sep, sep, "uncertainty=", uncertainty);
+      if !cd.exact[idx] {
+        outFile.write(sep, sep, "uncertainty=", cd.uncertainties[idx]);
       }
-      if !unitless {
-        if !isExact then try! outFile.write(",\n");
-        try! outFile.write(sep, sep, "unit=", "\"", unit, "\"", "\n");
+      if !cd.unitless[idx] {
+        if !cd.exact[idx] then outFile.write(",\n");
+        outFile.write(sep, sep, "unit=", "\"", cd.units[idx], "\"", "\n");
       } else {
-        try! outFile.write("\n");
+        outFile.write("\n");
       }
 
-      try! outFile.write(sep, ");\n\n");
+      outFile.write(sep, ");\n\n");
     }
 
-    try! outFile.write("}\n");
+    outFile.write("}\n");
+  }
+
+  proc computeDerived(cd: codata) throws {
+    for idx in 0..#cd.n {
+      if cd.derived[idx] {
+        // TODO: cd must be a map to acceses vars by name
+        // select cd.names[idx] {
+        // when "atomic unit of action" do cd.values[idx] = ...;
+        // otherwise halt("derived constant not yet supported");
+      }
+    }
+  }
+
+  proc createCodataFile(const yr: int): void throws {
+    var file = codataMap[yr];
+    use URL;
+    var (nconstants, nheader, year_check) = getCodataInfo(openUrlReader(file));
+    if yr != year_check then throw new Error(
+      "Loaded file year does not match the codataMap (dev must update)"
+    );
+    var cd = readData(openUrlReader(file), nconstants, nheader);
+    computeDerived(cd);
+    writeData(cd, year);
+  }
+
+  proc main() throws {
+    createCodataFile(year);
   }
 
 }
