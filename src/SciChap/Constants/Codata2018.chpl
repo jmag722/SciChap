@@ -1,5 +1,5 @@
 /* CODATA 2018
-  from NIST, https://physics.nist.gov/cuu/Constants/ArchiveASCII/allascii_2018.txt
+  NIST, https://physics.nist.gov/cuu/Constants/ArchiveASCII/allascii_2018.txt
 */
 
 module Codata2018 {

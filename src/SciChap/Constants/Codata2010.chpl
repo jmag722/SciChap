@@ -1,5 +1,5 @@
 /* CODATA 2010
-  from NIST, https://physics.nist.gov/cuu/Constants/ArchiveASCII/allascii_2010.txt
+  NIST, https://physics.nist.gov/cuu/Constants/ArchiveASCII/allascii_2010.txt
 */
 
 module Codata2010 {

@@ -1,5 +1,5 @@
 /* CODATA 2022
-  from NIST, https://pml.nist.gov/cuu/Constants/Table/allascii.txt
+  NIST, https://pml.nist.gov/cuu/Constants/Table/allascii.txt
 */
 
 module Codata2022 {

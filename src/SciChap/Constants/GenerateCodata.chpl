@@ -155,7 +155,7 @@ module GenerateCodata {
     const outFile = IO.openWriter(outFilename);
 
     outFile.write("/* CODATA ", cd.year:string, "\n");
-    outFile.write(sep, "from NIST, ", cd.file, "\n");
+    outFile.write(sep, "NIST, ", cd.file, "\n");
     outFile.write("*/\n\n");
 
     outFile.write("module Codata", cd.year:string, " {\n");
@@ -193,20 +193,21 @@ module GenerateCodata {
     outFile.write("}\n");
   }
 
-  @chplcheck.ignore("LineLength")
+
   /* check that the derived value matches the expected value in the file
   */
   proc checkVals(const actual: real, const expected: real,
                  const name:string): void throws {
     if !isClose(actual, expected, relTol=8e-10) {
-      var errStr = "Developer, you derived this constant (%s) incorrectly.\n".format(name);
+      var errStr =
+        "Developer, you derived this constant (%s) incorrectly.\n".format(name);
       errStr += "Computed value: %.17r\n".format(actual);
       errStr += "Expected value: %.17r...".format(expected);
       throw new DeveloperError(errStr);
     }
   }
 
-  @chplcheck.ignore("LineLength")
+
   /* Compute derived CODATA quantities 2018, 2022
 
     :arg cd: codata object
@@ -236,68 +237,131 @@ module GenerateCodata {
       if cd.derived[idx] {
         select cd.names[idx] {
           when "atomic unit of action" do cd.values[idx] = fmtStr.format(hbar);
-          when "Boltzmann constant in eV/K" do cd.values[idx] = fmtStr.format(k / e);
-          when "Boltzmann constant in Hz/K" do cd.values[idx] = fmtStr.format(k / h);
-          when "Boltzmann constant in inverse meter per kelvin" do cd.values[idx] = fmtStr.format(k / (h * c));
-          when "conductance quantum" do cd.values[idx] = fmtStr.format(2*e**2 / (2*pi*hbar));
-          when "conventional value of ampere-90" do cd.values[idx] = fmtStr.format(kj90 * rk90 / (kj * rk));
-          when "conventional value of coulomb-90" do cd.values[idx] = fmtStr.format(kj90 * rk90 / (kj * rk));
-          when "conventional value of farad-90" do cd.values[idx] = fmtStr.format(rk90 / rk);
-          when "conventional value of henry-90" do cd.values[idx] = fmtStr.format(rk / rk90);
-          when "conventional value of ohm-90" do cd.values[idx] = fmtStr.format(rk / rk90);
-          when "conventional value of volt-90" do cd.values[idx] = fmtStr.format(kj90 / kj);
-          when "conventional value of watt-90" do cd.values[idx] = fmtStr.format(kj90**2 * rk90 / (kj**2 * rk));
-          when "electron volt-hertz relationship" do cd.values[idx] = fmtStr.format(eV / h);
-          when "electron volt-inverse meter relationship" do cd.values[idx] = fmtStr.format(eV / (h * c));
-          when "electron volt-kelvin relationship" do cd.values[idx] = fmtStr.format(eV / k);
-          when "electron volt-kilogram relationship" do cd.values[idx] = fmtStr.format(eV / c**2);
-          when "elementary charge over h-bar" do cd.values[idx] = fmtStr.format(e / hbar);
-          when "Faraday constant" do cd.values[idx] = fmtStr.format(na*e);
-          when "first radiation constant" do cd.values[idx] = fmtStr.format(2*pi*h*c**2);
-          when "first radiation constant for spectral radiance" do cd.values[idx] = fmtStr.format(2*h*c**2);
-          when "hertz-electron volt relationship" do cd.values[idx] = fmtStr.format(h / e);
-          when "hertz-inverse meter relationship" do cd.values[idx] = fmtStr.format(1 / c);
-          when "hertz-kelvin relationship" do cd.values[idx] = fmtStr.format(h / k);
-          when "hertz-kilogram relationship" do cd.values[idx] = fmtStr.format(h / c**2);
-          when "inverse meter-electron volt relationship" do cd.values[idx] = fmtStr.format(h*c/e);
-          when "inverse meter-joule relationship" do cd.values[idx] = fmtStr.format(h*c);
-          when "inverse meter-kelvin relationship" do cd.values[idx] = fmtStr.format(h*c/k);
-          when "inverse meter-kilogram relationship" do cd.values[idx] = fmtStr.format(h / c);
-          when "inverse of conductance quantum" do cd.values[idx] = fmtStr.format(2*pi*hbar / (2*e**2));
-          when "Josephson constant" do cd.values[idx] = fmtStr.format(kj);
-          when "joule-electron volt relationship" do cd.values[idx] = fmtStr.format(1/e);
-          when "joule-hertz relationship" do cd.values[idx] = fmtStr.format(1/h);
-          when "joule-inverse meter relationship" do cd.values[idx] = fmtStr.format(1 / (h*c));
-          when "joule-kelvin relationship" do cd.values[idx] = fmtStr.format(1/k);
-          when "joule-kilogram relationship" do cd.values[idx] = fmtStr.format(1/c**2);
-          when "kelvin-electron volt relationship" do cd.values[idx] = fmtStr.format(k / e);
-          when "kelvin-hertz relationship" do cd.values[idx] = fmtStr.format(k / h);
-          when "kelvin-inverse meter relationship" do cd.values[idx] = fmtStr.format(k / (h*c));
-          when "kelvin-kilogram relationship" do cd.values[idx] = fmtStr.format(k / c**2);
-          when "kilogram-electron volt relationship" do cd.values[idx] = fmtStr.format(c**2/e);
-          when "kilogram-hertz relationship" do cd.values[idx] = fmtStr.format(c**2 / h);
-          when "kilogram-inverse meter relationship" do cd.values[idx] = fmtStr.format(c / h);
-          when "kilogram-joule relationship" do cd.values[idx] = fmtStr.format(c**2);
-          when "kilogram-kelvin relationship" do cd.values[idx] = fmtStr.format(c**2 / k);
-          when "Loschmidt constant (273.15 K, 100 kPa)" do cd.values[idx] = fmtStr.format(na / vm100);
-          when "Loschmidt constant (273.15 K, 101.325 kPa)" do cd.values[idx] = fmtStr.format(na / vm101325);
-          when "mag. flux quantum" do cd.values[idx] = fmtStr.format(2*pi*hbar / (2*e));
+          when "Boltzmann constant in eV/K" do cd.values[idx] =
+            fmtStr.format(k / e);
+          when "Boltzmann constant in Hz/K" do cd.values[idx] =
+            fmtStr.format(k / h);
+          when "Boltzmann constant in inverse meter per kelvin" {
+            cd.values[idx] = fmtStr.format(k / (h * c));
+          }
+          when "conductance quantum" do cd.values[idx] =
+            fmtStr.format(2*e**2 / (2*pi*hbar));
+          when "conventional value of ampere-90" do cd.values[idx] =
+            fmtStr.format(kj90 * rk90 / (kj * rk));
+          when "conventional value of coulomb-90" do cd.values[idx] =
+            fmtStr.format(kj90 * rk90 / (kj * rk));
+          when "conventional value of farad-90" do cd.values[idx] =
+            fmtStr.format(rk90 / rk);
+          when "conventional value of henry-90" do cd.values[idx] =
+            fmtStr.format(rk / rk90);
+          when "conventional value of ohm-90" do cd.values[idx] =
+            fmtStr.format(rk / rk90);
+          when "conventional value of volt-90" do cd.values[idx] =
+            fmtStr.format(kj90 / kj);
+          when "conventional value of watt-90" do cd.values[idx] =
+            fmtStr.format(kj90**2 * rk90 / (kj**2 * rk));
+          when "electron volt-hertz relationship" do cd.values[idx] =
+            fmtStr.format(eV / h);
+          when "electron volt-inverse meter relationship" do cd.values[idx] =
+            fmtStr.format(eV / (h * c));
+          when "electron volt-kelvin relationship" do cd.values[idx] =
+            fmtStr.format(eV / k);
+          when "electron volt-kilogram relationship" do cd.values[idx] =
+            fmtStr.format(eV / c**2);
+          when "elementary charge over h-bar" do cd.values[idx] =
+            fmtStr.format(e / hbar);
+          when "Faraday constant" do cd.values[idx] =
+            fmtStr.format(na*e);
+          when "first radiation constant" do cd.values[idx] =
+            fmtStr.format(2*pi*h*c**2);
+          when "first radiation constant for spectral radiance" {
+            cd.values[idx] = fmtStr.format(2*h*c**2);
+          }
+          when "hertz-electron volt relationship" do cd.values[idx] =
+            fmtStr.format(h / e);
+          when "hertz-inverse meter relationship" do cd.values[idx] =
+            fmtStr.format(1 / c);
+          when "hertz-kelvin relationship" do cd.values[idx] =
+            fmtStr.format(h / k);
+          when "hertz-kilogram relationship" do cd.values[idx] =
+            fmtStr.format(h / c**2);
+          when "inverse meter-electron volt relationship" do cd.values[idx] =
+            fmtStr.format(h*c/e);
+          when "inverse meter-joule relationship" do cd.values[idx] =
+            fmtStr.format(h*c);
+          when "inverse meter-kelvin relationship" do cd.values[idx] =
+            fmtStr.format(h*c/k);
+          when "inverse meter-kilogram relationship" do cd.values[idx] =
+            fmtStr.format(h / c);
+          when "inverse of conductance quantum" do cd.values[idx] =
+            fmtStr.format(2*pi*hbar / (2*e**2));
+          when "Josephson constant" do cd.values[idx] =
+            fmtStr.format(kj);
+          when "joule-electron volt relationship" do cd.values[idx] =
+            fmtStr.format(1/e);
+          when "joule-hertz relationship" do cd.values[idx] =
+            fmtStr.format(1/h);
+          when "joule-inverse meter relationship" do cd.values[idx] =
+            fmtStr.format(1 / (h*c));
+          when "joule-kelvin relationship" do cd.values[idx] =
+            fmtStr.format(1/k);
+          when "joule-kilogram relationship" do cd.values[idx] =
+            fmtStr.format(1/c**2);
+          when "kelvin-electron volt relationship" do cd.values[idx] =
+            fmtStr.format(k / e);
+          when "kelvin-hertz relationship" do cd.values[idx] =
+            fmtStr.format(k / h);
+          when "kelvin-inverse meter relationship" do cd.values[idx] =
+            fmtStr.format(k / (h*c));
+          when "kelvin-kilogram relationship" do cd.values[idx] =
+            fmtStr.format(k / c**2);
+          when "kilogram-electron volt relationship" do cd.values[idx] =
+            fmtStr.format(c**2/e);
+          when "kilogram-hertz relationship" do cd.values[idx] =
+            fmtStr.format(c**2 / h);
+          when "kilogram-inverse meter relationship" do cd.values[idx] =
+            fmtStr.format(c / h);
+          when "kilogram-joule relationship" do cd.values[idx] =
+            fmtStr.format(c**2);
+          when "kilogram-kelvin relationship" do cd.values[idx] =
+            fmtStr.format(c**2 / k);
+          when "Loschmidt constant (273.15 K, 100 kPa)" do cd.values[idx] =
+            fmtStr.format(na / vm100);
+          when "Loschmidt constant (273.15 K, 101.325 kPa)" do cd.values[idx] =
+            fmtStr.format(na / vm101325);
+          when "mag. flux quantum" do cd.values[idx] =
+            fmtStr.format(2*pi*hbar / (2*e));
           when "molar gas constant" do cd.values[idx] = fmtStr.format(gasRu);
-          when "molar Planck constant" do cd.values[idx] = fmtStr.format(na * h);
-          when "molar volume of ideal gas (273.15 K, 100 kPa)" do cd.values[idx] = fmtStr.format(vm100);
-          when "molar volume of ideal gas (273.15 K, 101.325 kPa)" do cd.values[idx] = fmtStr.format(vm101325);
+          when "molar Planck constant" do cd.values[idx] =
+            fmtStr.format(na * h);
+          when "molar volume of ideal gas (273.15 K, 100 kPa)" {
+            cd.values[idx] = fmtStr.format(vm100);
+          }
+          when "molar volume of ideal gas (273.15 K, 101.325 kPa)" {
+            cd.values[idx] = fmtStr.format(vm101325);
+          }
           when "natural unit of action" do cd.values[idx] = fmtStr.format(hbar);
-          when "natural unit of action in eV s" do cd.values[idx] = fmtStr.format(hbar / e);
-          when "Planck constant in eV/Hz" do cd.values[idx] = fmtStr.format(h / e);
-          when "reduced Planck constant" do cd.values[idx] = fmtStr.format(hbar);
-          when "reduced Planck constant in eV s" do cd.values[idx] = fmtStr.format(hbar / e);
-          when "reduced Planck constant times c in MeV fm" do cd.values[idx] = fmtStr.format(hbar * c / (e * 1e6 * 1e-15));
-          when "second radiation constant" do cd.values[idx] = fmtStr.format(h*c/k);
-          when "Stefan-Boltzmann constant" do cd.values[idx] = fmtStr.format(pi**2/60 * k**4/(hbar**3 * c**2));
+          when "natural unit of action in eV s" do cd.values[idx] =
+            fmtStr.format(hbar / e);
+          when "Planck constant in eV/Hz" do cd.values[idx] =
+            fmtStr.format(h / e);
+          when "reduced Planck constant" do cd.values[idx] =
+            fmtStr.format(hbar);
+          when "reduced Planck constant in eV s" do cd.values[idx] =
+            fmtStr.format(hbar / e);
+          when "reduced Planck constant times c in MeV fm" do cd.values[idx] =
+            fmtStr.format(hbar * c / (e * 1e6 * 1e-15));
+          when "second radiation constant" do cd.values[idx] =
+            fmtStr.format(h*c/k);
+          when "Stefan-Boltzmann constant" do cd.values[idx] =
+            fmtStr.format(pi**2/60 * k**4/(hbar**3 * c**2));
           when "von Klitzing constant" do cd.values[idx] = fmtStr.format(rk);
-          when "Wien frequency displacement law constant" do cd.values[idx] = fmtStr.format(xpeak_nu * k / h);
-          when "Wien wavelength displacement law constant" do cd.values[idx] = fmtStr.format(h*c/(k * xpeak_lam));
-          otherwise halt("derived constant (" + cd.names[idx] + ") is not expected");
+          when "Wien frequency displacement law constant" do cd.values[idx] =
+            fmtStr.format(xpeak_nu * k / h);
+          when "Wien wavelength displacement law constant" do cd.values[idx] =
+            fmtStr.format(h*c/(k * xpeak_lam));
+          otherwise halt(
+            "derived constant (" + cd.names[idx] + ") is not expected");
         }
         // check that this computed value matches what was read from the file
         var fileValue = derivedMap[cd.names[idx]].replace("...", ""):real;
@@ -306,7 +370,6 @@ module GenerateCodata {
     }
   }
 
-  @chplcheck.ignore("LineLength")
   /* Compute derived CODATA quantities 2014
 
     :arg cd: codata object
@@ -320,14 +383,22 @@ module GenerateCodata {
     for idx in 0..#cd.n {
       if cd.derived[idx] {
         select cd.names[idx] {
-          when "atomic unit of permittivity" do cd.values[idx] = fmtStr.format(1e7/c**2);
-          when "characteristic impedance of vacuum" do cd.values[idx] = fmtStr.format(mu0 * c);
-          when "electric constant" do cd.values[idx] = fmtStr.format(1 / (mu0 * c**2));
-          when "hertz-inverse meter relationship" do cd.values[idx] = fmtStr.format(1/c);
-          when "joule-kilogram relationship" do cd.values[idx] = fmtStr.format(1/c**2);
-          when "kilogram-joule relationship" do cd.values[idx] = fmtStr.format(c**2);
+          when "atomic unit of permittivity" do cd.values[idx] =
+              fmtStr.format(1e7/c**2);
+          when "characteristic impedance of vacuum" do cd.values[idx] =
+              fmtStr.format(mu0 * c);
+          when "electric constant" do cd.values[idx] =
+            fmtStr.format(1 / (mu0 * c**2));
+          when "hertz-inverse meter relationship" do cd.values[idx] =
+            fmtStr.format(1/c);
+          when "joule-kilogram relationship" do cd.values[idx] =
+            fmtStr.format(1/c**2);
+          when "kilogram-joule relationship" do cd.values[idx] =
+            fmtStr.format(c**2);
           when "mag. constant" do cd.values[idx] = fmtStr.format(mu0);
-          otherwise halt("derived constant (" + cd.names[idx] + ") is not expected");
+          otherwise halt(
+            "derived constant (" + cd.names[idx] + ") is not expected"
+          );
         }
         // check that this computed value matches what was read from the file
         var fileValue = derivedMap[cd.names[idx]].replace("...", ""):real;

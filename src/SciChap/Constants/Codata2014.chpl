@@ -1,5 +1,5 @@
 /* CODATA 2014
-  from NIST, https://physics.nist.gov/cuu/Constants/ArchiveASCII/allascii_2014.txt
+  NIST, https://physics.nist.gov/cuu/Constants/ArchiveASCII/allascii_2014.txt
 */
 
 module Codata2014 {
