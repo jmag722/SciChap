@@ -4,25 +4,36 @@ module GenerateCodata {
   import Map;
   import Math.{isClose, pi};
   import Regex;
+  use URL;
 
+  /* map from CODATA year to the URL of the file */
   var codataMap = new Map.map(int, string);
   codataMap.add(2022, "https://pml.nist.gov/cuu/Constants/Table/allascii.txt");
+
+  /* User-specified CODATA year */
   config const year:int = 2022;
 
-
+  const sep = "  ";
 
   class DeveloperError: Error {
     proc init(msg:string) { super.init(msg); }
   }
 
-  const sep = "  ";
 
-  proc getCodataInfo(reader): (int, int, int) throws {
+  /* get information from CODATA file online
+
+  :arg reader: open URL reader
+
+  :returns: the number of CODATA constants, the number of header lines in the
+            file, and the year of the file
+  */
+  proc getCodataInfo(const filename): (int, int, int) throws {
     var nlines = 0;
     var header = true;
     var nheader = 0;
     var yearRegex = new Regex.regex("\\d{4}");
     var year: int = -1;
+    var reader = openUrlReader(filename);
 
     for line in reader.lines() {
       nlines += 1;
@@ -40,25 +51,43 @@ module GenerateCodata {
     return (nconstants, nheader, year);
   }
 
+  /* record for storing CODATA values while processing
+  */
   record codata {
     var n: int;
-    var names: [0..#n] string;
-    var varnames: [0..#n] string;
+    var year: int;
+    var file: string;  // filename or url
+    var names: [0..#n] string;  // raw CODATA name
+    var varnames: [0..#n] string;  // variable names for chapel module
     var values: [0..#n] string;
     var uncertainties: [0..#n] string;
     var units: [0..#n] string;
-    var derived: [0..#n] bool;
-    var unitless: [0..#n] bool;
-    var exact: [0..#n] bool;
+    var derived: [0..#n] bool;  // value should be computed for inc. precision
+    var unitless: [0..#n] bool;  // no units
+    var exact: [0..#n] bool;  // is value exact
   }
 
-  proc readData(filereader, nconstants: int, nheader: int): codata throws {
-    var cd = new codata(n=nconstants);
+  /* Read online CODATA file
 
-    for 1..#nheader do filereader.readLine();
+    :arg filename: name of file (url)
+
+    :arg nconstants: number of constants to read
+
+    :arg nheader: number of header lines to skip
+
+    :arg yr: year of file
+
+    :returns: CODATA object
+  */
+  proc readData(const filename, in nconstants: int, in nheader: int,
+                in yr:int): codata throws {
+    var reader = openUrlReader(filename);
+    var cd = new codata(n=nconstants, year=yr, file=filename);
+
+    for 1..#nheader do reader.readLine();
 
     for idx in 0..#nconstants {
-      var line = filereader.readLine();
+      var line = reader.readLine();
       cd.names[idx] = line[0..<60].strip();
       cd.units[idx] = line[110..].strip();
       cd.unitless[idx] = cd.units[idx] == "";
@@ -91,11 +120,19 @@ module GenerateCodata {
     return cd;
   }
 
-  proc writeData(cd: codata, yr: int): void throws {
-    const outFilename = "Codata" + yr:string + ".chpl";
+  /* Write CODATA into chapel module
+
+     :arg cd: codata object
+  */
+  proc writeData(const cd: codata): void throws {
+    const outFilename = "Codata" + cd.year:string + ".chpl";
     const outFile = IO.openWriter(outFilename);
 
-    outFile.write("module Codata", yr:string, " {\n");
+    outFile.write("/* CODATA ", cd.year:string, "\n");
+    outFile.write(sep, "from NIST, ", cd.file, "\n");
+    outFile.write("*/\n\n");
+
+    outFile.write("module Codata", cd.year:string, " {\n");
     outFile.write(sep, "import ConstantsMod.constant;\n\n");
 
     for idx in 0..#cd.n {
@@ -239,15 +276,14 @@ module GenerateCodata {
   }
 
   proc createCodataFile(const yr: int): void throws {
-    var file = codataMap[yr];
-    use URL;
-    var (nconstants, nheader, year_check) = getCodataInfo(openUrlReader(file));
-    if yr != year_check then throw new Error(
-      "Loaded file year does not match the codataMap (dev must update)"
+    var filename = codataMap[yr];
+    var (nconstants, nheader, year_check) = getCodataInfo(filename);
+    if yr != year_check then throw new DeveloperError(
+      "The year in the CODATA file header does not match the input year"
     );
-    var cd = readData(openUrlReader(file), nconstants, nheader);
+    var cd = readData(filename, nconstants, nheader, yr);
     computeDerived(cd);
-    writeData(cd, year);
+    writeData(cd);
   }
 
   proc main() throws {
