@@ -8,7 +8,14 @@ module GenerateCodata {
 
   /* map from CODATA year to the URL of the file */
   var codataMap = new Map.map(int, string);
-  codataMap.add(2022, "https://pml.nist.gov/cuu/Constants/Table/allascii.txt");
+  codataMap.add(
+    2022,
+    "https://pml.nist.gov/cuu/Constants/Table/allascii.txt"
+  );
+  codataMap.add(
+    2018,
+    "https://physics.nist.gov/cuu/Constants/ArchiveASCII/allascii_2018.txt"
+  );
 
   /* User-specified CODATA year */
   config const year:int = 2022;
