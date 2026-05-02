@@ -20,6 +20,10 @@ module GenerateCodata {
     2014,
     "https://physics.nist.gov/cuu/Constants/ArchiveASCII/allascii_2014.txt"
   );
+  codataMap.add(
+    2010,
+    "https://physics.nist.gov/cuu/Constants/ArchiveASCII/allascii_2010.txt"
+  );
 
   /* User-specified CODATA year */
   config const year:int = 2022;
@@ -341,6 +345,7 @@ module GenerateCodata {
     var cd = readData(filename, nconstants, nheader, yr);
     select yr {
       when 2014 do computeDerived2014(cd);
+      when 2010 do computeDerived2014(cd);
       otherwise do computeDerived(cd);
     }
     writeData(cd);
