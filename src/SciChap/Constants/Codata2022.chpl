@@ -1,3 +1,7 @@
+/* CODATA 2022
+  from NIST, https://pml.nist.gov/cuu/Constants/Table/allascii.txt
+*/
+
 module Codata2022 {
   import ConstantsMod.constant;
 
@@ -177,7 +181,7 @@ module Codata2022 {
   /* atomic unit of action (exact) */
   const atomicUnitOfAction = new constant(
     name="atomic unit of action",
-    value=1.054_571_817e-34,
+    value=1.0545718176461565e-34,
     unit="J s"
   );
 
@@ -405,21 +409,21 @@ module Codata2022 {
   /* Boltzmann constant in eV/K (exact) */
   const boltzmannConstantInEvK = new constant(
     name="Boltzmann constant in eV/K",
-    value=8.617_333_262e-5,
+    value=8.6173332621451788e-05,
     unit="eV K^-1"
   );
 
   /* Boltzmann constant in Hz/K (exact) */
   const boltzmannConstantInHzK = new constant(
     name="Boltzmann constant in Hz/K",
-    value=2.083_661_912e10,
+    value=20836619123.327576,
     unit="Hz K^-1"
   );
 
   /* Boltzmann constant in inverse meter per kelvin (exact) */
   const boltzmannConstantInInverseMeterPerKelvin = new constant(
     name="Boltzmann constant in inverse meter per kelvin",
-    value=69.503_480_04,
+    value=69.503480048612744,
     unit="m^-1 K^-1"
   );
 
@@ -450,35 +454,35 @@ module Codata2022 {
   /* conductance quantum (exact) */
   const conductanceQuantum = new constant(
     name="conductance quantum",
-    value=7.748_091_729e-5,
+    value=7.7480917298636487e-05,
     unit="S"
   );
 
   /* conventional value of ampere-90 (exact) */
   const conventionalValueOfAmpere90 = new constant(
     name="conventional value of ampere-90",
-    value=1.000_000_088_87,
+    value=1.000000088871438,
     unit="A"
   );
 
   /* conventional value of coulomb-90 (exact) */
   const conventionalValueOfCoulomb90 = new constant(
     name="conventional value of coulomb-90",
-    value=1.000_000_088_87,
+    value=1.000000088871438,
     unit="C"
   );
 
   /* conventional value of farad-90 (exact) */
   const conventionalValueOfFarad90 = new constant(
     name="conventional value of farad-90",
-    value=0.999_999_982_20,
+    value=0.99999998220633257,
     unit="F"
   );
 
   /* conventional value of henry-90 (exact) */
   const conventionalValueOfHenry90 = new constant(
     name="conventional value of henry-90",
-    value=1.000_000_017_79,
+    value=1.0000000177936679,
     unit="H"
   );
 
@@ -492,14 +496,14 @@ module Codata2022 {
   /* conventional value of ohm-90 (exact) */
   const conventionalValueOfOhm90 = new constant(
     name="conventional value of ohm-90",
-    value=1.000_000_017_79,
+    value=1.0000000177936679,
     unit="ohm"
   );
 
   /* conventional value of volt-90 (exact) */
   const conventionalValueOfVolt90 = new constant(
     name="conventional value of volt-90",
-    value=1.000_000_106_66,
+    value=1.0000001066651072,
     unit="V"
   );
 
@@ -513,7 +517,7 @@ module Codata2022 {
   /* conventional value of watt-90 (exact) */
   const conventionalValueOfWatt90 = new constant(
     name="conventional value of watt-90",
-    value=1.000_000_195_53,
+    value=1.0000001955365545,
     unit="W"
   );
 
@@ -875,14 +879,14 @@ module Codata2022 {
   /* electron volt-hertz relationship (exact) */
   const electronVoltHertzRelationship = new constant(
     name="electron volt-hertz relationship",
-    value=2.417_989_242e14,
+    value=241798924208491.81,
     unit="Hz"
   );
 
   /* electron volt-inverse meter relationship (exact) */
   const electronVoltInverseMeterRelationship = new constant(
     name="electron volt-inverse meter relationship",
-    value=8.065_543_937e5,
+    value=806554.39373492112,
     unit="m^-1"
   );
 
@@ -896,14 +900,14 @@ module Codata2022 {
   /* electron volt-kelvin relationship (exact) */
   const electronVoltKelvinRelationship = new constant(
     name="electron volt-kelvin relationship",
-    value=1.160_451_812e4,
+    value=11604.518121550082,
     unit="K"
   );
 
   /* electron volt-kilogram relationship (exact) */
   const electronVoltKilogramRelationship = new constant(
     name="electron volt-kilogram relationship",
-    value=1.782_661_921e-36,
+    value=1.7826619216278975e-36,
     unit="kg"
   );
 
@@ -917,14 +921,14 @@ module Codata2022 {
   /* elementary charge over h-bar (exact) */
   const elementaryChargeOverHBar = new constant(
     name="elementary charge over h-bar",
-    value=1.519_267_447e15,
+    value=1519267447878626,
     unit="A J^-1"
   );
 
   /* Faraday constant (exact) */
   const faradayConstant = new constant(
     name="Faraday constant",
-    value=96_485.332_12,
+    value=96485.332123310014,
     unit="C mol^-1"
   );
 
@@ -946,14 +950,14 @@ module Codata2022 {
   /* first radiation constant (exact) */
   const firstRadiationConstant = new constant(
     name="first radiation constant",
-    value=3.741_771_852e-16,
+    value=3.7417718521927573e-16,
     unit="W m^2"
   );
 
   /* first radiation constant for spectral radiance (exact) */
   const firstRadiationConstantForSpectralRadiance = new constant(
     name="first radiation constant for spectral radiance",
-    value=1.191_042_972e-16,
+    value=1.1910429723971884e-16,
     unit="W m^2 sr^-1"
   );
 
@@ -1137,7 +1141,7 @@ module Codata2022 {
   /* hertz-electron volt relationship (exact) */
   const hertzElectronVoltRelationship = new constant(
     name="hertz-electron volt relationship",
-    value=4.135_667_696e-15,
+    value=4.135667696923859e-15,
     unit="eV"
   );
 
@@ -1152,7 +1156,7 @@ module Codata2022 {
   /* hertz-inverse meter relationship (exact) */
   const hertzInverseMeterRelationship = new constant(
     name="hertz-inverse meter relationship",
-    value=3.335_640_951e-9,
+    value=3.3356409519815204e-09,
     unit="m^-1"
   );
 
@@ -1166,14 +1170,14 @@ module Codata2022 {
   /* hertz-kelvin relationship (exact) */
   const hertzKelvinRelationship = new constant(
     name="hertz-kelvin relationship",
-    value=4.799_243_073e-11,
+    value=4.799243073366221e-11,
     unit="K"
   );
 
   /* hertz-kilogram relationship (exact) */
   const hertzKilogramRelationship = new constant(
     name="hertz-kilogram relationship",
-    value=7.372_497_323e-51,
+    value=7.3724973238127084e-51,
     unit="kg"
   );
 
@@ -1202,7 +1206,7 @@ module Codata2022 {
   /* inverse meter-electron volt relationship (exact) */
   const inverseMeterElectronVoltRelationship = new constant(
     name="inverse meter-electron volt relationship",
-    value=1.239_841_984e-6,
+    value=1.2398419843320026e-06,
     unit="eV"
   );
 
@@ -1224,35 +1228,35 @@ module Codata2022 {
   /* inverse meter-joule relationship (exact) */
   const inverseMeterJouleRelationship = new constant(
     name="inverse meter-joule relationship",
-    value=1.986_445_857e-25,
+    value=1.9864458571489286e-25,
     unit="J"
   );
 
   /* inverse meter-kelvin relationship (exact) */
   const inverseMeterKelvinRelationship = new constant(
     name="inverse meter-kelvin relationship",
-    value=1.438_776_877e-2,
+    value=0.014387768775039337,
     unit="K"
   );
 
   /* inverse meter-kilogram relationship (exact) */
   const inverseMeterKilogramRelationship = new constant(
     name="inverse meter-kilogram relationship",
-    value=2.210_219_094e-42,
+    value=2.2102190943042335e-42,
     unit="kg"
   );
 
   /* inverse of conductance quantum (exact) */
   const inverseOfConductanceQuantum = new constant(
     name="inverse of conductance quantum",
-    value=12_906.403_72,
+    value=12906.403729652257,
     unit="ohm"
   );
 
   /* Josephson constant (exact) */
   const josephsonConstant = new constant(
     name="Josephson constant",
-    value=483_597.848_4e9,
+    value=483597848416983.62,
     unit="Hz V^-1"
   );
 
@@ -1267,7 +1271,7 @@ module Codata2022 {
   /* joule-electron volt relationship (exact) */
   const jouleElectronVoltRelationship = new constant(
     name="joule-electron volt relationship",
-    value=6.241_509_074e18,
+    value=6.2415090744607631e+18,
     unit="eV"
   );
 
@@ -1282,28 +1286,28 @@ module Codata2022 {
   /* joule-hertz relationship (exact) */
   const jouleHertzRelationship = new constant(
     name="joule-hertz relationship",
-    value=1.509_190_179e33,
+    value=1.5091901796421518e+33,
     unit="Hz"
   );
 
   /* joule-inverse meter relationship (exact) */
   const jouleInverseMeterRelationship = new constant(
     name="joule-inverse meter relationship",
-    value=5.034_116_567e24,
+    value=5.0341165675427099e+24,
     unit="m^-1"
   );
 
   /* joule-kelvin relationship (exact) */
   const jouleKelvinRelationship = new constant(
     name="joule-kelvin relationship",
-    value=7.242_970_516e22,
+    value=7.2429705160399199e+22,
     unit="K"
   );
 
   /* joule-kilogram relationship (exact) */
   const jouleKilogramRelationship = new constant(
     name="joule-kilogram relationship",
-    value=1.112_650_056e-17,
+    value=1.1126500560536185e-17,
     unit="kg"
   );
 
@@ -1318,7 +1322,7 @@ module Codata2022 {
   /* kelvin-electron volt relationship (exact) */
   const kelvinElectronVoltRelationship = new constant(
     name="kelvin-electron volt relationship",
-    value=8.617_333_262e-5,
+    value=8.6173332621451788e-05,
     unit="eV"
   );
 
@@ -1333,14 +1337,14 @@ module Codata2022 {
   /* kelvin-hertz relationship (exact) */
   const kelvinHertzRelationship = new constant(
     name="kelvin-hertz relationship",
-    value=2.083_661_912e10,
+    value=20836619123.327576,
     unit="Hz"
   );
 
   /* kelvin-inverse meter relationship (exact) */
   const kelvinInverseMeterRelationship = new constant(
     name="kelvin-inverse meter relationship",
-    value=69.503_480_04,
+    value=69.503480048612744,
     unit="m^-1"
   );
 
@@ -1354,7 +1358,7 @@ module Codata2022 {
   /* kelvin-kilogram relationship (exact) */
   const kelvinKilogramRelationship = new constant(
     name="kelvin-kilogram relationship",
-    value=1.536_179_187e-40,
+    value=1.5361791872403723e-40,
     unit="kg"
   );
 
@@ -1369,7 +1373,7 @@ module Codata2022 {
   /* kilogram-electron volt relationship (exact) */
   const kilogramElectronVoltRelationship = new constant(
     name="kilogram-electron volt relationship",
-    value=5.609_588_603e35,
+    value=5.6095886038044519e+35,
     unit="eV"
   );
 
@@ -1384,28 +1388,28 @@ module Codata2022 {
   /* kilogram-hertz relationship (exact) */
   const kilogramHertzRelationship = new constant(
     name="kilogram-hertz relationship",
-    value=1.356_392_489e50,
+    value=1.3563924896521321e+50,
     unit="Hz"
   );
 
   /* kilogram-inverse meter relationship (exact) */
   const kilogramInverseMeterRelationship = new constant(
     name="kilogram-inverse meter relationship",
-    value=4.524_438_335e41,
+    value=4.524438335443823e+41,
     unit="m^-1"
   );
 
   /* kilogram-joule relationship (exact) */
   const kilogramJouleRelationship = new constant(
     name="kilogram-joule relationship",
-    value=8.987_551_787e16,
+    value=89875517873681760,
     unit="J"
   );
 
   /* kilogram-kelvin relationship (exact) */
   const kilogramKelvinRelationship = new constant(
     name="kilogram-kelvin relationship",
-    value=6.509_657_260e39,
+    value=6.5096572607289584e+39,
     unit="K"
   );
 
@@ -1428,14 +1432,14 @@ module Codata2022 {
   /* Loschmidt constant (273.15 K, 100 kPa) (exact) */
   const loschmidtConstant27315K100Kpa = new constant(
     name="Loschmidt constant (273.15 K, 100 kPa)",
-    value=2.651_645_804e25,
+    value=2.6516458048837345e+25,
     unit="m^-3"
   );
 
   /* Loschmidt constant (273.15 K, 101.325 kPa) (exact) */
   const loschmidtConstant27315K101325Kpa = new constant(
     name="Loschmidt constant (273.15 K, 101.325 kPa)",
-    value=2.686_780_111e25,
+    value=2.6867801117984439e+25,
     unit="m^-3"
   );
 
@@ -1449,14 +1453,14 @@ module Codata2022 {
   /* mag. flux quantum (exact) */
   const magFluxQuantum = new constant(
     name="mag. flux quantum",
-    value=2.067_833_848e-15,
+    value=2.0678338484619295e-15,
     unit="Wb"
   );
 
   /* molar gas constant (exact) */
   const molarGasConstant = new constant(
     name="molar gas constant",
-    value=8.314_462_618,
+    value=8.3144626181532395,
     unit="J mol^-1 K^-1"
   );
 
@@ -1479,21 +1483,21 @@ module Codata2022 {
   /* molar Planck constant (exact) */
   const molarPlanckConstant = new constant(
     name="molar Planck constant",
-    value=3.990_312_712e-10,
+    value=3.9903127128934311e-10,
     unit="J Hz^-1 mol^-1"
   );
 
   /* molar volume of ideal gas (273.15 K, 100 kPa) (exact) */
   const molarVolumeOfIdealGas27315K100Kpa = new constant(
     name="molar volume of ideal gas (273.15 K, 100 kPa)",
-    value=22.710_954_64e-3,
+    value=0.022710954641485571,
     unit="m^3 mol^-1"
   );
 
   /* molar volume of ideal gas (273.15 K, 101.325 kPa) (exact) */
   const molarVolumeOfIdealGas27315K101325Kpa = new constant(
     name="molar volume of ideal gas (273.15 K, 101.325 kPa)",
-    value=22.413_969_54e-3,
+    value=0.022413969545014137,
     unit="m^3 mol^-1"
   );
 
@@ -1635,14 +1639,14 @@ module Codata2022 {
   /* natural unit of action (exact) */
   const naturalUnitOfAction = new constant(
     name="natural unit of action",
-    value=1.054_571_817e-34,
+    value=1.0545718176461565e-34,
     unit="J s"
   );
 
   /* natural unit of action in eV s (exact) */
   const naturalUnitOfActionInEvS = new constant(
     name="natural unit of action in eV s",
-    value=6.582_119_569e-16,
+    value=6.582119569509067e-16,
     unit="eV s"
   );
 
@@ -1956,7 +1960,7 @@ module Codata2022 {
   /* Planck constant in eV/Hz (exact) */
   const planckConstantInEvHz = new constant(
     name="Planck constant in eV/Hz",
-    value=4.135_667_696e-15,
+    value=4.135667696923859e-15,
     unit="eV Hz^-1"
   );
 
@@ -2201,21 +2205,21 @@ module Codata2022 {
   /* reduced Planck constant (exact) */
   const reducedPlanckConstant = new constant(
     name="reduced Planck constant",
-    value=1.054_571_817e-34,
+    value=1.0545718176461565e-34,
     unit="J s"
   );
 
   /* reduced Planck constant in eV s (exact) */
   const reducedPlanckConstantInEvS = new constant(
     name="reduced Planck constant in eV s",
-    value=6.582_119_569e-16,
+    value=6.582119569509067e-16,
     unit="eV s"
   );
 
   /* reduced Planck constant times c in MeV fm (exact) */
   const reducedPlanckConstantTimesCInMevFm = new constant(
     name="reduced Planck constant times c in MeV fm",
-    value=197.326_980_4,
+    value=197.32698045930249,
     unit="MeV fm"
   );
 
@@ -2284,7 +2288,7 @@ module Codata2022 {
   /* second radiation constant (exact) */
   const secondRadiationConstant = new constant(
     name="second radiation constant",
-    value=1.438_776_877e-2,
+    value=0.014387768775039337,
     unit="m K"
   );
 
@@ -2423,7 +2427,7 @@ module Codata2022 {
   /* Stefan-Boltzmann constant (exact) */
   const stefanBoltzmannConstant = new constant(
     name="Stefan-Boltzmann constant",
-    value=5.670_374_419e-8,
+    value=5.6703744191844301e-08,
     unit="W m^-2 K^-4"
   );
 
@@ -2635,7 +2639,7 @@ module Codata2022 {
   /* von Klitzing constant (exact) */
   const vonKlitzingConstant = new constant(
     name="von Klitzing constant",
-    value=25_812.807_45,
+    value=25812.807459304513,
     unit="ohm"
   );
 
@@ -2649,14 +2653,14 @@ module Codata2022 {
   /* Wien frequency displacement law constant (exact) */
   const wienFrequencyDisplacementLawConstant = new constant(
     name="Wien frequency displacement law constant",
-    value=5.878_925_757e10,
+    value=58789257576.468254,
     unit="Hz K^-1"
   );
 
   /* Wien wavelength displacement law constant (exact) */
   const wienWavelengthDisplacementLawConstant = new constant(
     name="Wien wavelength displacement law constant",
-    value=2.897_771_955e-3,
+    value=0.0028977719551851727,
     unit="m K"
   );
 
