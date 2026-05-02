@@ -16,6 +16,10 @@ module GenerateCodata {
     2018,
     "https://physics.nist.gov/cuu/Constants/ArchiveASCII/allascii_2018.txt"
   );
+  codataMap.add(
+    2014,
+    "https://physics.nist.gov/cuu/Constants/ArchiveASCII/allascii_2014.txt"
+  );
 
   /* User-specified CODATA year */
   config const year:int = 2022;
@@ -72,6 +76,14 @@ module GenerateCodata {
     var derived: [0..#n] bool;  // value should be computed for inc. precision
     var unitless: [0..#n] bool;  // no units
     var exact: [0..#n] bool;  // is value exact
+
+    proc toMap(): Map.map(string, string) {
+      var derivedMap = new Map.map(string, string);
+      for (n, v) in zip(names, values) {
+        derivedMap.add(n, v);
+      }
+      return derivedMap;
+    }
   }
 
   /* Read online CODATA file
@@ -101,6 +113,9 @@ module GenerateCodata {
 
       // create variable name, remove symbols
       cd.varnames[idx] = cd.names[idx];
+      if cd.varnames[idx].startsWith("{220}") {
+        cd.varnames[idx] = "lattice spacing of silicon (220)";
+      }
       cd.varnames[idx] = cd.varnames[idx].replace(
         new Regex.regex("[ .()/,-]"), "_");
       // make varname camel case
@@ -175,15 +190,25 @@ module GenerateCodata {
   }
 
   @chplcheck.ignore("LineLength")
-  /* Compute derived CODATA quantities
+  /* check that the derived value matches the expected value in the file
+  */
+  proc checkVals(const actual: real, const expected: real,
+                 const name:string): void throws {
+    if !isClose(actual, expected, relTol=8e-10) {
+      var errStr = "Developer, you derived this constant (%s) incorrectly.\n".format(name);
+      errStr += "Computed value: %.17r\n".format(actual);
+      errStr += "Expected value: %.17r...".format(expected);
+      throw new DeveloperError(errStr);
+    }
+  }
+
+  @chplcheck.ignore("LineLength")
+  /* Compute derived CODATA quantities 2018, 2022
 
     :arg cd: codata object
   */
   proc computeDerived(ref cd: codata) throws {
-    var derivedMap = new Map.map(string, string);
-    for (n, v) in zip(cd.names, cd.values) {
-      derivedMap.add(n, v);
-    }
+    var derivedMap = cd.toMap();
     const h = derivedMap["Planck constant"]:real;
     const k = derivedMap["Boltzmann constant"]:real;
     const c = derivedMap["speed of light in vacuum"]:real;
@@ -268,16 +293,41 @@ module GenerateCodata {
           when "von Klitzing constant" do cd.values[idx] = fmtStr.format(rk);
           when "Wien frequency displacement law constant" do cd.values[idx] = fmtStr.format(xpeak_nu * k / h);
           when "Wien wavelength displacement law constant" do cd.values[idx] = fmtStr.format(h*c/(k * xpeak_lam));
-          otherwise halt("derived constant is not expected");
+          otherwise halt("derived constant (" + cd.names[idx] + ") is not expected");
         }
         // check that this computed value matches what was read from the file
         var fileValue = derivedMap[cd.names[idx]].replace("...", ""):real;
-        if !isClose(cd.values[idx]:real, fileValue, relTol=8e-10) {
-          var errStr = "Developer, you derived this constant (%s) incorrectly.\n".format(cd.names[idx]);
-          errStr += "Computed value: %.17r\n".format(cd.values[idx]:real);
-          errStr += "Expected value: %.17r...".format(fileValue);
-          throw new DeveloperError(errStr);
+        checkVals(cd.values[idx]:real, expected=fileValue, cd.names[idx]);
+      }
+    }
+  }
+
+  @chplcheck.ignore("LineLength")
+  /* Compute derived CODATA quantities 2014
+
+    :arg cd: codata object
+  */
+  proc computeDerived2014(ref cd: codata) throws {
+    var derivedMap = cd.toMap();
+    const mu0 = 4 * pi * 1e-7;
+    const c = derivedMap["speed of light in vacuum"]:real;
+
+    var fmtStr = "%.17r";
+    for idx in 0..#cd.n {
+      if cd.derived[idx] {
+        select cd.names[idx] {
+          when "atomic unit of permittivity" do cd.values[idx] = fmtStr.format(1e7/c**2);
+          when "characteristic impedance of vacuum" do cd.values[idx] = fmtStr.format(mu0 * c);
+          when "electric constant" do cd.values[idx] = fmtStr.format(1 / (mu0 * c**2));
+          when "hertz-inverse meter relationship" do cd.values[idx] = fmtStr.format(1/c);
+          when "joule-kilogram relationship" do cd.values[idx] = fmtStr.format(1/c**2);
+          when "kilogram-joule relationship" do cd.values[idx] = fmtStr.format(c**2);
+          when "mag. constant" do cd.values[idx] = fmtStr.format(mu0);
+          otherwise halt("derived constant (" + cd.names[idx] + ") is not expected");
         }
+        // check that this computed value matches what was read from the file
+        var fileValue = derivedMap[cd.names[idx]].replace("...", ""):real;
+        checkVals(cd.values[idx]:real, expected=fileValue, cd.names[idx]);
       }
     }
   }
@@ -289,7 +339,10 @@ module GenerateCodata {
       "The year in the CODATA file header does not match the input year"
     );
     var cd = readData(filename, nconstants, nheader, yr);
-    computeDerived(cd);
+    select yr {
+      when 2014 do computeDerived2014(cd);
+      otherwise do computeDerived(cd);
+    }
     writeData(cd);
   }
 
