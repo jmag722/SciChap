@@ -1,3 +1,6 @@
+/*
+  Constants: Useful constants for unit conversions, including CODATA.
+*/
 module Constants {
   include module ConstantsMod;
   include module Codata2022;
