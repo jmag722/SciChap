@@ -2,6 +2,8 @@ module ConstantsMod {
   import Math;
 
   record constant {
+    /* full name of constant */
+    param name: string;
     /* numerical value */
     param value: real;
     /* standard uncertainty */

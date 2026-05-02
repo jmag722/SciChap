@@ -3,7 +3,7 @@
 */
 
 module Codata2010 {
-  import ConstantsMod.constant;
+  import SciChap.Constants.ConstantsMod.constant;
 
   /* {220} lattice spacing of silicon */
   const latticeSpacingOfSilicon220 = new constant(

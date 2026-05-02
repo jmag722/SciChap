@@ -159,7 +159,7 @@ module GenerateCodata {
     outFile.write("*/\n\n");
 
     outFile.write("module Codata", cd.year:string, " {\n");
-    outFile.write(sep, "import ConstantsMod.constant;\n\n");
+    outFile.write(sep, "import SciChap.Constants.ConstantsMod.constant;\n\n");
 
     for idx in 0..#cd.n {
       // write comment describing variable, if exact or not

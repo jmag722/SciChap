@@ -3,7 +3,7 @@
 */
 
 module Codata2018 {
-  import ConstantsMod.constant;
+  import SciChap.Constants.ConstantsMod.constant;
 
   /* alpha particle-electron mass ratio */
   const alphaParticleElectronMassRatio = new constant(
