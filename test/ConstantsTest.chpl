@@ -1,4 +1,4 @@
-module CodataTest {
+module ConstantsTest {
   use UnitTest;
 
   import SciChap.Constants;

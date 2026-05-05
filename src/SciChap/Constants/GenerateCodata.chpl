@@ -1,3 +1,4 @@
+@chpldoc.nodoc
 module GenerateCodata {
   import IO;
   import IO.FormattedIO.format;
