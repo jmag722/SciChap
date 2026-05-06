@@ -18,7 +18,7 @@ jobs:
         run: mason doc
       - name: Upload artifacts...
         id: deployment
-        uses: actions/upload-pages-artifact@v4
+        uses: actions/upload-pages-artifact@v5
         with:
           name: doc-latest
           path: doc/
