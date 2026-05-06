@@ -1,7 +1,8 @@
 /*
-  Private Constants module
 
-  TODO: figure out how to add sections so it's not a mass of constants in doc
+Private Constants module
+
+TODO: figure out how to add sections so it's not a mass of constants in doc
 
 ..
   START_HERE

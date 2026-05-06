@@ -1,11 +1,11 @@
 /*
-  Useful constants for unit conversions.
+Useful constants for unit conversions.
 
-  The latest CODATA values will be available directly from this module. Older
-  values are available only through directly importing the relevant submodule.
+The latest CODATA values will be available directly from this module. Older
+values are available only through directly importing the relevant submodule.
 
-  .. include:: Constants/ConstantsMod.rst
-    :start-after: START_HERE
+.. include:: Constants/ConstantsMod.rst
+  :start-after: START_HERE
 
 */
 module Constants {
