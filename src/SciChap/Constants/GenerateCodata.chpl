@@ -1,3 +1,13 @@
+/*
+  This script takes a user-specified CODATA release year and generates a
+  Chapel module with the constants.
+
+  Initial work on this script came from AI generated python script that
+  trained on Vincent Magnin's "Fundamental_Constants" repo. I rewrote it in
+  Chapel without looking but the workflow is very similar.
+  Special thanks to the Scipy repo as well for some structuring.
+  See NOTICE file for more information.
+*/
 @chpldoc.nodoc
 module GenerateCodata {
   import IO;
