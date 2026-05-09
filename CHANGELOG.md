@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## [v0.1.0] - 2026-MM-DD
+## [v0.1.0] - 2026-05-09
 
 Initial release
 
@@ -10,9 +10,11 @@ Initial release
 
 - constants library, including CODATA
 
-- basic numerical integration
+- basic numerical integration (trapezoidal, simpson)
 
-- basic rootfinding
+- serial tridiagonal matrix algorithm (TDMA/Thomas)
+
+- basic rootfinding (bisection)
 
 - misc. array functionality
 
