@@ -16,7 +16,7 @@ module LinAlg {
     Reference:
       Laszlo, E., Giles, M., & Appleyard, J. (2016).
       Manycore algorithms for batch scalar and block tridiagonal solvers.
-      `ACM Transactions on Mathematical Software (TOMS)`, `42`(4), 1-36.
+      `ACM Transactions on Mathematical Software (TOMS)`, `42` (4), 1-36.
 
     :arg lower: lower diagonal (subdiagonal), length ``N-1``
 
@@ -47,8 +47,7 @@ module LinAlg {
       x[idx] = r * fma(-lo[idx], x[idx-1], x[idx]);
       up[idx] *= r;
     }
-    x[N-1] = fma(-lo[N-1], x[N-2], x[N-1])
-           / fma(-lo[N-1], up[N-2], diag[N-1]);
+    x[N-1] = fma(-lo[N-1], x[N-2], x[N-1]) / fma(-lo[N-1], up[N-2], diag[N-1]);
 
     // back substitution
     for idx in 0..N-2 by -1 {
