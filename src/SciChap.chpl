@@ -2,6 +2,7 @@ module SciChap {
   include module Array;
   include module Constants;
   include module Integration;
+  include module LinAlg;
   include module Root;
   include module Spatial;
   include module Statistics;
@@ -9,6 +10,7 @@ module SciChap {
   public import this.Array;
   public import this.Constants;
   public import this.Integration;
+  public import this.LinAlg;
   public import this.Root;
   public import this.Spatial;
   public import this.Statistics;
