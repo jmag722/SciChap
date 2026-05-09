@@ -2,8 +2,11 @@
 name="SciChap"
 version="0.1.0"
 chplVersion="2.8.0"
-license="BSD-3-Clause"
 type="library"
+source="git@github.com:jmag722/SciChap.git"
+authors=["Jared Magnusson"]
+license="BSD-3-Clause"
+copyrightYear="2025"
 
 [tool.chpl-language-server]
 module-dir="src"
