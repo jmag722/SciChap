@@ -28,13 +28,15 @@ You'd be right to be skeptical about a programmer trying to write a library even
   - [x] trapezoidal/simpson
 - [ ] interpolation (nearest neighbor, linear, spline, RBF ...)
 - [ ] linear algebra
-  - [ ] TDMA/PCR for efficiently solving tridiagonal systems
+  - [x] TDMA
+  - [ ] PCR or some hybrid suitable for GPU
 - [ ] root-finding
-  - [ ] bracketed methods (midpoint, regula falsi, ...)
+  - [ ] bracketed methods (bisection, regula falsi, ...)
   - [ ] open and other hybrid approaches (Newton, Brent, etc)
 - [ ] spatial
   - [X] K-D Tree
-  - [ ] 2D and (someday) 3D Delaunay triangulation
+  - [ ] 2D Delaunay triangulation
+  - [ ] 3D Delaunay triangulation
 - [ ] statistics
 
 Other items:

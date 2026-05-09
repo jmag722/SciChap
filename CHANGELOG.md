@@ -17,7 +17,3 @@ Initial release
 - basic rootfinding (bisection)
 
 - misc. array functionality
-
-### Fixes
-
--
