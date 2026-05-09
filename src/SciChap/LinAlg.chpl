@@ -11,7 +11,7 @@ module LinAlg {
     Serial tri-diagonal matrix algorithm (TDMA), or the Thomas algorithm.
     Matrix should be diagonally dominant (or close enough).
 
-    The solution is computed in-place at the variable ``rhs``.
+    The solution is computed in-place and stored at ``rhs``.
 
     Reference:
       Laszlo, E., Giles, M., & Appleyard, J. (2016).
@@ -26,7 +26,7 @@ module LinAlg {
 
     :arg rhs: right hand side of system, length ``N``
 
-    :returns: void (solution variable is ``rhs``)
+    :returns: void (solution variable stored at ``rhs``)
   */
   proc tdma(const lower: [?Dm1] real, const diagonal: [?D] real,
             ref upper: [Dm1] real, ref rhs: [D] real): void
@@ -36,23 +36,23 @@ module LinAlg {
     const ref lo = lower.reindex(1..N-1);
     const ref diag = diagonal.reindex(0..N-1);
     ref up = upper.reindex(0..N-2);
-    ref rh = rhs.reindex(0..N-1);
+    ref x = rhs.reindex(0..N-1);
 
     // forward substitution
-    rh[0] /= diag[0];
+    x[0] /= diag[0];
     up[0] /= diag[0];
     var r: real;
     for idx in 1..N-2 {
       r = 1.0 / fma(-lo[idx], up[idx-1], diag[idx]);
-      rh[idx] = r * fma(-lo[idx], rh[idx-1], rh[idx]);
+      x[idx] = r * fma(-lo[idx], x[idx-1], x[idx]);
       up[idx] *= r;
     }
-    rh[N-1] = fma(-lo[N-1], rh[N-2], rh[N-1])
-            / fma(-lo[N-1], up[N-2], diag[N-1]);
+    x[N-1] = fma(-lo[N-1], x[N-2], x[N-1])
+           / fma(-lo[N-1], up[N-2], diag[N-1]);
 
     // back substitution
     for idx in 0..N-2 by -1 {
-      rh[idx] = fma(-up[idx], rh[idx+1], rh[idx]);
+      x[idx] = fma(-up[idx], x[idx+1], x[idx]);
     }
   }
 
